@@ -1,0 +1,7 @@
+FROM zamafhe/concrete-ml
+WORKDIR /project
+COPY ./client/client.py .
+COPY ./client/client_requirements.txt .
+RUN python -m pip install -r client_requirements.txt
+ENV URL="http://192.168.1.6:5000"
+ENTRYPOINT /bin/bash

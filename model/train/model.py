@@ -13,6 +13,44 @@ from sklearn.model_selection import KFold, cross_val_score, KFold
 import time
 from concrete.ml.deployment import FHEModelDev
 
+pd.set_option('display.max_rows', 5)
+pd.set_option('display.max_columns', 500)
+pd.set_option('display.width', 1000)
+np.random.seed(42)
+def get_data(df: pd.DataFrame = None) -> pd.DataFrame:
+
+    
+    df["REASON"].fillna(value="DebtCon", inplace=True)
+    df["JOB"].fillna(value="Other", inplace=True)
+
+    df["DEROG"].fillna(value=0, inplace=True)
+    df["DELINQ"].fillna(value=0, inplace=True)
+    df.fillna(value=df.mean(), inplace=True)
+
+
+    df.loc[df["CLAGE"] >= 600, "CLAGE"] = 600
+    df.loc[df["VALUE"] >= 400000, "VALUE"] = 400000
+    df.loc[df["MORTDUE"] >= 300000, "MORTDUE"] = 300000
+    df.loc[df["DEBTINC"] >= 100, "DEBTINC"] = 100
+
+    df["B_DEROG"] = (df["DEROG"] >= 1) * 1
+    df["B_DELINQ"] = (df["DELINQ"] >= 1) * 1
+
+    df["REASON_1"] = (df["REASON"] == "HomeImp") * 1
+    df["REASON_2"] = (df["REASON"] != "HomeImp") * 1
+    df["JOB_1"] = (df["JOB"] == "Other") * 1
+    df["JOB_2"] = (df["JOB"] == "Office") * 1
+    df["JOB_3"] = (df["JOB"] == "Sales") * 1
+    df["JOB_4"] = (df["JOB"] == "Mgr") * 1
+    df["JOB_5"] = (df["JOB"] == "ProfExe") * 1
+    df["JOB_6"] = (df["JOB"] == "Self") * 1
+    df.drop(["JOB", "REASON"], axis=1, inplace=True)
+
+
+    df["YOJ"] = df["YOJ"].apply(lambda t: np.log(t + 1))
+    return df
+
+
 
 def plot_confusion_matrix(
     cm, classes, normalize=False, title="Confusion matrix", cmap=plt.cm.Blues
@@ -51,39 +89,8 @@ def plot_confusion_matrix(
     plt.ylabel("True label")
     plt.xlabel("Predicted label")
 
-
-df = pd.read_csv("./input/hmeq.csv")
-df_i = pd.read_csv("./input/hmeq.csv")
-
-
-df["REASON"].fillna(value="DebtCon", inplace=True)
-df["JOB"].fillna(value="Other", inplace=True)
-
-df["DEROG"].fillna(value=0, inplace=True)
-df["DELINQ"].fillna(value=0, inplace=True)
-df.fillna(value=df.mean(), inplace=True)
-
-
-df.loc[df["CLAGE"] >= 600, "CLAGE"] = 600
-df.loc[df["VALUE"] >= 400000, "VALUE"] = 400000
-df.loc[df["MORTDUE"] >= 300000, "MORTDUE"] = 300000
-df.loc[df["DEBTINC"] >= 100, "DEBTINC"] = 100
-
-df["B_DEROG"] = (df["DEROG"] >= 1) * 1
-df["B_DELINQ"] = (df["DELINQ"] >= 1) * 1
-
-df["REASON_1"] = (df["REASON"] == "HomeImp") * 1
-df["REASON_2"] = (df["REASON"] != "HomeImp") * 1
-df["JOB_1"] = (df["JOB"] == "Other") * 1
-df["JOB_2"] = (df["JOB"] == "Office") * 1
-df["JOB_3"] = (df["JOB"] == "Sales") * 1
-df["JOB_4"] = (df["JOB"] == "Mgr") * 1
-df["JOB_5"] = (df["JOB"] == "ProfExe") * 1
-df["JOB_6"] = (df["JOB"] == "Self") * 1
-df.drop(["JOB", "REASON"], axis=1, inplace=True)
-
-
-df["YOJ"] = df["YOJ"].apply(lambda t: np.log(t + 1))
+raw_df = pd.read_csv("./input/hmeq.csv")
+df = get_data(df=raw_df)
 
 
 default_len = len(df[df["BAD"] == 1])
@@ -101,12 +108,20 @@ combined_indices = np.concatenate([rand_good_indices, default_indices])
 comb_df = df.iloc[combined_indices, :]
 comb_y = comb_df["BAD"]
 
+
+selector = SelectKBest(f_classif, k=10)
+
 comb_x = pd.DataFrame(
-    SelectKBest(f_classif, k=10).fit_transform(
+    selector.fit_transform(
         comb_df.drop(["BAD"], axis=1), comb_df["BAD"]
     )
 )
-comb_x.head()
+print(comb_df.head())
+print(comb_x.head())
+cols_idxs = selector.get_support(indices=True)
+print(cols_idxs)
+features_df_new = comb_x.reset_index().iloc[:,cols_idxs]
+print(features_df_new.head())
 
 
 x_trc, x_tec, y_trc, y_tec = train_test_split(
@@ -173,3 +188,12 @@ fhe_api.save()
 # )
 
 # plt.show()
+
+
+"""
+LOAN
+MORTDUE
+DEROG
+[ 0  3  4  5  6  7  9 10 11 15]
+[ 0  3  4  5  6  7  9 10 11 15]
+"""

@@ -3,3 +3,6 @@ scikit-learn
 pandas
 numpy
 matplotlib
+msgpack
+requests
+click

@@ -1,0 +1,8 @@
+FROM zamafhe/concrete-ml
+WORKDIR /project
+COPY dev dev
+COPY ./server/server_requirements.txt server_requirements.txt
+COPY ./server/server.py server.py
+RUN python -m pip install -r ./server_requirements.txt
+EXPOSE 5000
+ENTRYPOINT python server.py
