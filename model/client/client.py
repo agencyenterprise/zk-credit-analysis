@@ -10,7 +10,7 @@ import numpy as np
 import msgpack
 import click
 import pandas as pd
-
+import grequests
 logging.basicConfig(level=logging.INFO)
 
 
@@ -55,6 +55,49 @@ KEY_PATH = Path(os.environ.get("KEY_PATH", FILE_FOLDER / Path("server_keys")))
 CLIENT_SERVER_PATH = Path(os.environ.get("PATH_TO_MODEL", FILE_FOLDER / Path("dev")))
 PORT = os.environ.get("PORT", "5002")
 SERVER_URL = os.environ.get("URL", f"http://localhost:5000")
+
+
+
+def make_prediction(client):
+    with open("input.msgpack", "rb") as data_file:
+        byte_data = data_file.read()
+    data_loaded = msgpack.unpackb(byte_data)
+    print(data_loaded)
+
+    encrypted_input = data_loaded["input"]
+    uid = data_loaded["uid"]
+
+
+    inferences = [
+                grequests.post(
+                    f"{SERVER_URL}/compute",
+                    files={
+                        "model_input": io.BytesIO(encrypted_input),
+                    },
+                    data={
+                        "uid": uid,
+                    },
+                )
+            ]
+    del encrypted_input
+    print("Posted!")
+
+    # Unpack the results
+    result = grequests.map(inferences)[0]
+    if result is None:
+        raise ValueError("Result is None, probably due to a crash on the server side.")
+    assert result.status_code == STATUS_OK
+    print("OK!")
+
+    encrypted_result = result.content
+    decrypted_prediction = client.deserialize_decrypt_dequantize(encrypted_result)
+    #end = time.time()
+    print("type: ", type(decrypted_prediction.tolist()))
+
+    print(decrypted_prediction.tolist())
+    probabilities = np.array(decrypted_prediction,dtype=float).tolist()
+    logging.info(probabilities)
+    return probabilities
 
 
 class LoanRequest(TypedDict):
@@ -149,7 +192,7 @@ def encrypt(inputs: LoanRequest):
     encrypted_input = client.quantize_encrypt_serialize(clear_input)
     assert isinstance(encrypted_input, bytes)
     data = {"input": encrypted_input, "uid": uid}
-    return msgpack.packb(data, use_bin_type=True)
+    return (msgpack.packb(data, use_bin_type=True), client)
 
 
 @click.command()
@@ -184,9 +227,10 @@ def main(
         clno=clno,
         debtinc=debtinc,
     )
-    data = encrypt(inputs)
+    data, client = encrypt(inputs)
     with open("input.msgpack", "wb") as file:
         file.write(data)
+    make_prediction(client)
 
 
 if __name__ == "__main__":
