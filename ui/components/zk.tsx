@@ -2,10 +2,15 @@ import { readFile } from "fs/promises";
 import Image from "next/image";
 import { FormEvent, useEffect, useState } from "react";
 import { initialize, ZoKratesProvider } from "zokrates-js";
+import { useMetamask } from "../hooks/useMetamask";
+import getTransactions from "../utils/transactions";
+import { useLoan } from "../hooks/useLoan";
 
 const snarkjs = require("snarkjs");
 
 const ZK = (props: any) => {
+  const { state } = useMetamask();
+  const { state: loanState } = useLoan();
   const [zokratesProvider, setZokratesProvider] = useState<ZoKratesProvider>();
   const [isLoading, setIsLoading] = useState(false);
   const [proof, setProof] = useState<{
@@ -22,7 +27,22 @@ const ZK = (props: any) => {
   }, []);
 
   //   const toast = useToast();
-
+  const getAggregations = async () => {
+    const { wallet, balance } = state;
+    const { loan } = loanState;
+    const parsedBalance = (+balance! + 1).toFixed(0);
+    const { expenses, earnings, balanceRatio, averageEarning, averageExpense } =
+      await getTransactions(wallet!);
+    return [
+      [
+        parsedBalance,
+        earnings.toFixed(0),
+        expenses.toFixed(0),
+        balanceRatio.toFixed(0),
+      ],
+      loan.toFixed(0),
+    ];
+  };
   const onSubmit = () => {
     setIsLoading(true);
     setProof(undefined);
@@ -34,11 +54,10 @@ const ZK = (props: any) => {
         const program = zokratesProvider!.compile(props.source);
         //Uint8Array.from(Buffer.from(props.program, "hex"));
         console.log("2");
-        const output = zokratesProvider!.computeWitness(
-          program,
-          [["1000", "1000", "1000", "1000"], "100"],
-          { snarkjs: true }
-        );
+        const inputs = await getAggregations();
+        const output = zokratesProvider!.computeWitness(program, inputs, {
+          snarkjs: true,
+        });
         console.log("3");
         const provingKey = Uint8Array.from(
           Buffer.from(props.provingKey, "hex")
