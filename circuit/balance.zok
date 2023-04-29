@@ -1,0 +1,24 @@
+def validate_cpf<i>(u32[11] cpf) -> bool {
+    u32 mut r = 0;
+    u32 mut f = 0;
+    
+    for u32 j in 0..i {
+        //log("j: {}", j);
+        r = r + (i + 1 - j)*cpf[j];
+    }
+    r = r % 11;
+    f = r > 1 ? 11 - r : 0;
+    //log("cpf[i] is {}, f is {}", cpf[i], f);
+    bool mut result = cpf[i] == f;
+    assert(true == result);
+    return result;
+}
+
+
+def main(private u32 value ) {
+    assert(value > 0);
+    return;
+}
+
+
+

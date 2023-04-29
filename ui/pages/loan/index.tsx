@@ -13,7 +13,8 @@ import HistoryForm from "../../components/historyForm";
 import { initialState, useLoan } from "../../hooks/useLoan";
 import IncomeForm from "../../components/incomeForm";
 import CreditForm from "../../components/creditForm";
-
+import ctaStyle from "../../components/cta.module.css";
+import LoanTermsForm from "../../components/loanTermsForm";
 const steps = ["Assets", "Income", "Credit History", "Loan Terms", "Review"];
 
 export default function LoanForm() {
@@ -60,6 +61,7 @@ export default function LoanForm() {
         ninq,
         clno,
         debtinc,
+        encrypted,
       } = loanState ? JSON.parse(loanState) : initialState;
       dispatchLoan({ type: "history", mortdue, value });
       dispatchLoan({ type: "income", reason, job, yoj });
@@ -72,7 +74,7 @@ export default function LoanForm() {
         clno,
         debtinc,
       });
-      dispatchLoan({ type: "loan", loan });
+      dispatchLoan({ type: "loan", loan, encrypted });
     }
   }, []);
   const isStepOptional = (step: number) => {
@@ -147,6 +149,15 @@ export default function LoanForm() {
             steps={steps}
           ></CreditForm>
         );
+      case 3:
+        return (
+          <LoanTermsForm
+            nextPage={handleNext}
+            prevPage={handleBack}
+            activeStep={activeStep}
+            steps={steps}
+          ></LoanTermsForm>
+        );
       default:
         return (
           <Typography sx={{ mt: 2, mb: 1 }}>Step {activeStep + 1}</Typography>
@@ -156,7 +167,7 @@ export default function LoanForm() {
   const FormSteps = (props: any) => {
     const { activeStep } = props;
     return (
-      <div className="min-h-[800px]">
+      <div className="min-h-[700px] flex-col justify-center">
         <StepForm activeStep={activeStep}></StepForm>
         <Box sx={{ display: "flex", flexDirection: "row", pt: 2 }}>
           <Button
@@ -183,31 +194,37 @@ export default function LoanForm() {
   return (
     <>
       <Wallet />
-      <div className="flex justify-center pt-32 container mx-auto">
-        <Box sx={{ width: "80%" }}>
-          <Stepper activeStep={activeStep}>
-            {steps.map((label, index) => {
-              const stepProps: { completed?: boolean } = {};
-              const labelProps: {
-                optional?: React.ReactNode;
-              } = {};
-              if (isStepOptional(index)) {
-                labelProps.optional = (
-                  <Typography variant="caption">Optional</Typography>
+      <div
+        className={
+          "flex justify-center pt-10 pb-10 container mx-auto " + ctaStyle.form
+        }
+      >
+        <div className="relative z-10 bg-white px-5 flex justify-center shadow-lg pt-5 rounded-lg">
+          <Box sx={{ width: "100%" }}>
+            <Stepper activeStep={activeStep}>
+              {steps.map((label, index) => {
+                const stepProps: { completed?: boolean } = {};
+                const labelProps: {
+                  optional?: React.ReactNode;
+                } = {};
+                if (isStepOptional(index)) {
+                  labelProps.optional = (
+                    <Typography variant="caption">Optional</Typography>
+                  );
+                }
+                if (isStepSkipped(index)) {
+                  stepProps.completed = false;
+                }
+                return (
+                  <Step key={label} {...stepProps}>
+                    <StepLabel {...labelProps}>{label}</StepLabel>
+                  </Step>
                 );
-              }
-              if (isStepSkipped(index)) {
-                stepProps.completed = false;
-              }
-              return (
-                <Step key={label} {...stepProps}>
-                  <StepLabel {...labelProps}>{label}</StepLabel>
-                </Step>
-              );
-            })}
-          </Stepper>
-          <FormSteps activeStep={activeStep}></FormSteps>
-        </Box>
+              })}
+            </Stepper>
+            <FormSteps activeStep={activeStep}></FormSteps>
+          </Box>
+        </div>
       </div>
     </>
   );

@@ -5,6 +5,7 @@ import { useListen } from "../hooks/useListen";
 import { useMetamask } from "../hooks/useMetamask";
 import { CTA } from "../components/cta";
 import ctaStyle from "../components/cta.module.css";
+import aggregateTransactionData from "../utils/transactions";
 const Home: NextPage = () => {
   const { dispatch, state } = useMetamask();
   const listen = useListen();
@@ -24,6 +25,19 @@ const Home: NextPage = () => {
       },
     });
     dispatch({ type: "idle" });
+  };
+  const getTransactions = async () => {
+    const rawResponse = await fetch("/api/transactions", {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ address: state.wallet }),
+    });
+    const content = await rawResponse.json();
+    const aggregations = aggregateTransactionData(content);
+    console.log(aggregations);
   };
   useEffect(() => {
     if (typeof window !== undefined) {
@@ -49,6 +63,8 @@ const Home: NextPage = () => {
       console.log(`wallet: ${wallet}, balance: ${balance}`);
       // console.log(state);
       dispatch({ type: "pageLoaded", isMetamaskInstalled, wallet, balance });
+
+      wallet && getTransactions();
     }
   }, []);
 

@@ -11,7 +11,7 @@ type AddCredit = {
   clno: number;
   debtinc: number;
 };
-type LoanTerms = { type: "loan"; loan: number };
+type LoanTerms = { type: "loan"; loan: number; encrypted: boolean };
 
 type Action = AddHistory | AddIncome | AddCredit | LoanTerms;
 
@@ -32,6 +32,7 @@ export const initialState: State = {
   ninq: 0.0,
   clno: 0.0,
   debtinc: 0.0,
+  encrypted: false,
 } as const;
 
 type State = {
@@ -47,6 +48,7 @@ type State = {
   ninq: number;
   clno: number;
   debtinc: number;
+  encrypted: boolean;
 };
 
 function loanReducer(state: State, action: Action): State {
@@ -81,8 +83,8 @@ function loanReducer(state: State, action: Action): State {
       return newState;
     }
     case "loan": {
-      const { loan } = action;
-      const newState = { ...state, loan } as State;
+      const { loan, encrypted } = action;
+      const newState = { ...state, loan, encrypted } as State;
       const info = JSON.stringify(newState);
       window.localStorage.setItem("loanState", info);
       return newState;

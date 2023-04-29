@@ -42,79 +42,86 @@ export default function IncomeForm(props: any) {
 
   return (
     <form onSubmit={formik.handleSubmit}>
-      <div className="flex flex-col space-y-5 justify-center w-full pt-10">
-        <InputLabel id="reason-label">Reason for loan request</InputLabel>
-        <Select
-          labelId="reason-label"
-          id="reason"
-          name="reason"
-          label="Reason for loan request"
-          value={formik.values.reason}
-          onChange={formik.handleChange}
-          error={formik.touched.reason && Boolean(formik.errors.reason)}
-        >
-          {[
-            ["DebtCon", "Pay debts"],
-            ["HomeImp", "Home Improvements"],
-            ["Other", "Other"],
-          ].map((v) => {
-            return (
-              <MenuItem key={v[0]} value={v[0]}>
-                {v[1]}
-              </MenuItem>
-            );
-          })}
-        </Select>
-        <InputLabel id="job-label">Job position</InputLabel>
-        <Select
-          labelId="job-label"
-          id="job"
-          name="job"
-          label="Job position"
-          value={formik.values.job}
-          onChange={formik.handleChange}
-          error={formik.touched.job && Boolean(formik.errors.job)}
-          inputProps={{ name: "Job position" }}
-        >
-          {[
-            ["Other", "Other"],
-            ["Office", "Office Assistant"],
-            ["Sales", "Sales Representative"],
-            ["Mgr", "Manager"],
-            ["ProfExe", "Executive"],
-            ["Self", "Self Employed"],
-          ].map((v) => {
-            return (
-              <MenuItem key={v[0]} value={v[0]}>
-                {v[1]}
-              </MenuItem>
-            );
-          })}
-        </Select>
-        <TextField
-          fullWidth
-          id="yoj"
-          name="yoj"
-          label="Years at the present job"
-          type="number"
-          value={formik.values.yoj}
-          onChange={formik.handleChange}
-          error={formik.touched.yoj && Boolean(formik.errors.yoj)}
-          helperText={formik.touched.yoj && formik.errors.yoj}
-        />
-      </div>
-      <div className="flex just-between">
-        <Box sx={{ display: "flex", flexDirection: "row", pt: 2 }}>
-          {activeStep !== 0 && (
-            <Button color="inherit" onClick={prevPage} sx={{ mr: 1 }}>
-              Back
+      <div className="flex flex-col space-y-10 justify-center w-full">
+        <div className="flex flex-col space-y-5 min-h-[400px] w-full justify-center">
+          <InputLabel className="text-left" id="reason-label">
+            Reason for loan request
+          </InputLabel>
+          <Select
+            labelId="reason-label"
+            id="reason"
+            name="reason"
+            label="Reason for loan request"
+            value={formik.values.reason}
+            onChange={formik.handleChange}
+            error={formik.touched.reason && Boolean(formik.errors.reason)}
+          >
+            {[
+              ["DebtCon", "Pay debts"],
+              ["HomeImp", "Home Improvements"],
+              ["Other", "Other"],
+            ].map((v) => {
+              return (
+                <MenuItem key={v[0]} value={v[0]}>
+                  {v[1]}
+                </MenuItem>
+              );
+            })}
+          </Select>
+          <InputLabel className="text-left" id="job-label">
+            Job position
+          </InputLabel>
+          <Select
+            labelId="job-label"
+            id="job"
+            name="job"
+            label="Job position"
+            value={formik.values.job}
+            onChange={formik.handleChange}
+            error={formik.touched.job && Boolean(formik.errors.job)}
+            inputProps={{ name: "Job position" }}
+          >
+            {[
+              ["Other", "Other"],
+              ["Office", "Office Assistant"],
+              ["Sales", "Sales Representative"],
+              ["Mgr", "Manager"],
+              ["ProfExe", "Executive"],
+              ["Self", "Self Employed"],
+            ].map((v) => {
+              return (
+                <MenuItem key={v[0]} value={v[0]}>
+                  {v[1]}
+                </MenuItem>
+              );
+            })}
+          </Select>
+          <TextField
+            fullWidth
+            id="yoj"
+            name="yoj"
+            label="Years at the present job"
+            type="number"
+            value={formik.values.yoj}
+            onChange={formik.handleChange}
+            error={formik.touched.yoj && Boolean(formik.errors.yoj)}
+            helperText={formik.touched.yoj && formik.errors.yoj}
+          />
+        </div>
+
+        <div className="flex flex-col justify-between">
+          <Box sx={{ display: "flex", flexDirection: "row", pt: 2 }}>
+            {activeStep !== 0 && (
+              <Button color="inherit" onClick={prevPage} sx={{ mr: 1 }}>
+                Back
+              </Button>
+            )}
+            <Box sx={{ flex: "1 1 auto" }} />
+            <Button type="submit">
+              {activeStep === steps.length - 1 ? "Finish" : "Next"}
             </Button>
-          )}
-          <Box sx={{ flex: "1 1 auto" }} />
-          <Button type="submit">
-            {activeStep === steps.length - 1 ? "Finish" : "Next"}
-          </Button>
-        </Box>
+          </Box>
+        </div>
       </div>
     </form>
   );

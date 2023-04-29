@@ -56,85 +56,87 @@ export default function CreditForm(props: any) {
   return (
     <form onSubmit={formik.handleSubmit}>
       <div className="flex flex-col space-y-5 justify-center w-full pt-10">
-        <TextField
-          fullWidth
-          id="derog"
-          name="derog"
-          label="Number of derogatory remarks"
-          type="number"
-          value={formik.values.derog}
-          onChange={formik.handleChange}
-          error={formik.touched.derog && Boolean(formik.errors.derog)}
-          helperText={formik.touched.derog && formik.errors.derog}
-        />
-        <TextField
-          fullWidth
-          id="delinq"
-          name="delinq"
-          label="Number of delinquent payments"
-          type="number"
-          value={formik.values.delinq}
-          onChange={formik.handleChange}
-          error={formik.touched.delinq && Boolean(formik.errors.delinq)}
-          helperText={formik.touched.delinq && formik.errors.delinq}
-        />
-        <TextField
-          fullWidth
-          id="clage"
-          name="clage"
-          label="Oldest credit line (Months)"
-          type="number"
-          value={formik.values.clage}
-          onChange={formik.handleChange}
-          error={formik.touched.clage && Boolean(formik.errors.clage)}
-          helperText={formik.touched.clage && formik.errors.clage}
-        />
-        <TextField
-          fullWidth
-          id="ninq"
-          name="ninq"
-          label="Credit lines opened in the last 6 months"
-          type="number"
-          value={formik.values.ninq}
-          onChange={formik.handleChange}
-          error={formik.touched.ninq && Boolean(formik.errors.ninq)}
-          helperText={formik.touched.ninq && formik.errors.ninq}
-        />
-        <TextField
-          fullWidth
-          id="clno"
-          name="clno"
-          label="Number of credit lines"
-          type="number"
-          value={formik.values.clno}
-          onChange={formik.handleChange}
-          error={formik.touched.clno && Boolean(formik.errors.clno)}
-          helperText={formik.touched.clno && formik.errors.clno}
-        />
-        <TextField
-          fullWidth
-          id="debtinc"
-          name="debtinc"
-          label="Debt-to-income ratio"
-          type="number"
-          value={formik.values.debtinc}
-          onChange={formik.handleChange}
-          error={formik.touched.debtinc && Boolean(formik.errors.debtinc)}
-          helperText={formik.touched.debtinc && formik.errors.debtinc}
-        />
-      </div>
-      <div className="flex just-between">
-        <Box sx={{ display: "flex", flexDirection: "row", pt: 2 }}>
-          {activeStep !== 0 && (
-            <Button color="inherit" onClick={prevPage} sx={{ mr: 1 }}>
-              Back
+        <div className="flex flex-col space-y-5 min-h-[400px] w-full justify-center">
+          <TextField
+            fullWidth
+            id="derog"
+            name="derog"
+            label="Number of derogatory remarks"
+            type="number"
+            value={formik.values.derog}
+            onChange={formik.handleChange}
+            error={formik.touched.derog && Boolean(formik.errors.derog)}
+            helperText={formik.touched.derog && formik.errors.derog}
+          />
+          <TextField
+            fullWidth
+            id="delinq"
+            name="delinq"
+            label="Number of delinquent payments"
+            type="number"
+            value={formik.values.delinq}
+            onChange={formik.handleChange}
+            error={formik.touched.delinq && Boolean(formik.errors.delinq)}
+            helperText={formik.touched.delinq && formik.errors.delinq}
+          />
+          <TextField
+            fullWidth
+            id="clage"
+            name="clage"
+            label="Oldest credit line (Months)"
+            type="number"
+            value={formik.values.clage}
+            onChange={formik.handleChange}
+            error={formik.touched.clage && Boolean(formik.errors.clage)}
+            helperText={formik.touched.clage && formik.errors.clage}
+          />
+          <TextField
+            fullWidth
+            id="ninq"
+            name="ninq"
+            label="Credit lines opened in the last 6 months"
+            type="number"
+            value={formik.values.ninq}
+            onChange={formik.handleChange}
+            error={formik.touched.ninq && Boolean(formik.errors.ninq)}
+            helperText={formik.touched.ninq && formik.errors.ninq}
+          />
+          <TextField
+            fullWidth
+            id="clno"
+            name="clno"
+            label="Number of credit lines"
+            type="number"
+            value={formik.values.clno}
+            onChange={formik.handleChange}
+            error={formik.touched.clno && Boolean(formik.errors.clno)}
+            helperText={formik.touched.clno && formik.errors.clno}
+          />
+          <TextField
+            fullWidth
+            id="debtinc"
+            name="debtinc"
+            label="Debt-to-income ratio"
+            type="number"
+            value={formik.values.debtinc}
+            onChange={formik.handleChange}
+            error={formik.touched.debtinc && Boolean(formik.errors.debtinc)}
+            helperText={formik.touched.debtinc && formik.errors.debtinc}
+          />
+        </div>
+        <div className="flex flex-col justify-between">
+          <Box sx={{ display: "flex", flexDirection: "row", pt: 2 }}>
+            {activeStep !== 0 && (
+              <Button color="inherit" onClick={prevPage} sx={{ mr: 1 }}>
+                Back
+              </Button>
+            )}
+            <Box sx={{ flex: "1 1 auto" }} />
+            <Button type="submit">
+              {activeStep === steps.length - 1 ? "Finish" : "Next"}
             </Button>
-          )}
-          <Box sx={{ flex: "1 1 auto" }} />
-          <Button type="submit">
-            {activeStep === steps.length - 1 ? "Finish" : "Next"}
-          </Button>
-        </Box>
+          </Box>
+        </div>
       </div>
     </form>
   );

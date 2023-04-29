@@ -1,0 +1,16 @@
+// Computes a simple elegibility criteria for a loan
+// data => [0] - balance, [1] - earnings, [2] - expenses, [3] - ratio
+def main(private u32[4] data, field loan) {
+    u32 min_score = 500;
+    // balance should be positive
+    assert(data[0] > 0);
+    // total earnings should be more than 2*loan
+    assert(data[1] > 2*loan);
+    // debt ratio should be higher than 500
+    assert(data[3] > min_score);
+
+    return;
+}
+
+
+

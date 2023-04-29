@@ -1,64 +1,67 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useFormik } from "formik";
 import * as yup from "yup";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import { useLoan } from "../hooks/useLoan";
-import { Box } from "@mui/material";
+import { Box, Checkbox, FormControlLabel, InputLabel } from "@mui/material";
 
 const validationSchema = yup.object({
-  mortgage: yup
+  loan: yup
     .number()
-    .min(0, "Mortgage debt should be at least 0")
-    .required("Add your mortgage value"),
-  patrimony: yup
-    .number()
-    .min(1000, "Asset should be greater than 1000 USD")
-    .required("Patrimony is required"),
+    .min(100, "Loan be at least 100 USD")
+    .required("Loan value is required"),
+  encrypted: yup.boolean().required("Encryption is required"),
 });
 
-export default function HistoryForm(props: any) {
+export default function LoanTermsForm(props: any) {
   const { dispatch, state } = useLoan();
   const { nextPage, prevPage, activeStep, steps } = props;
   const formik = useFormik({
     initialValues: {
-      mortgage: state.mortdue ? state.mortdue : 0.0,
-      patrimony: state.value ? state.value : 1000.0,
+      loan: state.loan ? state.loan : 0,
+      encrypted: state.encrypted != undefined ? state.encrypted : true,
     },
     validationSchema: validationSchema,
     onSubmit: (values) => {
-      const { mortgage, patrimony } = values;
-      dispatch({ type: "history", mortdue: mortgage, value: patrimony });
+      let { loan, encrypted: e } = values;
+      let encrypted = e as boolean;
+      dispatch({ type: "loan", loan, encrypted });
       nextPage();
     },
   });
-
+  useEffect(() => {
+    console.log(state);
+  }, [state]);
   return (
     <form onSubmit={formik.handleSubmit}>
       <div className="flex flex-col space-y-5 justify-center w-full pt-10">
         <div className="space-y-5 min-h-[400px]">
           <TextField
             fullWidth
-            id="mortgage"
-            name="mortgage"
-            label="Mortgage Debt"
+            id="loan"
+            name="loan"
+            label="Loan value"
             type="number"
-            value={formik.values.mortgage}
+            value={formik.values.loan}
             onChange={formik.handleChange}
-            error={formik.touched.mortgage && Boolean(formik.errors.mortgage)}
-            helperText={formik.touched.mortgage && formik.errors.mortgage}
+            error={formik.touched.loan && Boolean(formik.errors.loan)}
+            helperText={formik.touched.loan && formik.errors.loan}
           />
-          <TextField
-            fullWidth
-            id="patrimony"
-            name="patrimony"
-            label="Patrimony"
-            type="number"
-            value={formik.values.patrimony}
-            onChange={formik.handleChange}
-            error={formik.touched.patrimony && Boolean(formik.errors.patrimony)}
-            helperText={formik.touched.patrimony && formik.errors.patrimony}
-          />
+          <div className="flex justify-start">
+            <FormControlLabel
+              control={
+                <Checkbox
+                  defaultChecked={formik.values.encrypted}
+                  id="encrypted"
+                  name="encrypted"
+                  value={formik.values.encrypted}
+                  onChange={formik.handleChange}
+                />
+              }
+              label="Encrypt loan data"
+            />
+          </div>
         </div>
 
         <div className="flex flex-col justify-between">
