@@ -5,8 +5,10 @@ import { useListen } from "../hooks/useListen";
 import { useMetamask } from "../hooks/useMetamask";
 import { CTA } from "../components/cta";
 import ctaStyle from "../components/cta.module.css";
-import aggregateTransactionData from "../utils/transactions";
-const Home: NextPage = () => {
+import ZK from "../components/zk";
+import { readFile } from "fs/promises";
+import getTransactions from "../utils/transactions";
+const Home: NextPage = (props) => {
   const { dispatch, state } = useMetamask();
   const listen = useListen();
   const handleAddUsdc = async () => {
@@ -26,19 +28,7 @@ const Home: NextPage = () => {
     });
     dispatch({ type: "idle" });
   };
-  const getTransactions = async () => {
-    const rawResponse = await fetch("/api/transactions", {
-      method: "POST",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ address: state.wallet }),
-    });
-    const content = await rawResponse.json();
-    const aggregations = aggregateTransactionData(content);
-    console.log(aggregations);
-  };
+
   useEffect(() => {
     if (typeof window !== undefined) {
       // start by checking if window.ethereum is present, indicating a wallet extension
@@ -64,7 +54,7 @@ const Home: NextPage = () => {
       // console.log(state);
       dispatch({ type: "pageLoaded", isMetamaskInstalled, wallet, balance });
 
-      wallet && getTransactions();
+      wallet && getTransactions(wallet);
     }
   }, []);
 
@@ -74,8 +64,40 @@ const Home: NextPage = () => {
       <div className={"container mx-auto min-h-screen pt-5 " + ctaStyle.cta}>
         <CTA />
       </div>
+      <ZK {...props} />
     </>
   );
 };
+
+export async function getStaticProps() {
+  // zokrates artifacts
+  const source = (await readFile("../circuit/balance.zok")).toString();
+  const program = (await readFile("../circuit/balance")).toString("hex");
+  const verificationKey = JSON.parse(
+    (await readFile("../circuit/verification.key")).toString()
+  );
+  const provingKey = (await readFile("../circuit/proving.key")).toString("hex");
+
+  // snarkjs artifacts
+  const zkey = (await readFile("../circuit/snarkjs/balance.zkey")).toString(
+    "hex"
+  );
+  const vkey = JSON.parse(
+    (await readFile("../circuit/snarkjs/verification_key.json")).toString()
+  );
+
+  return {
+    props: {
+      source,
+      program,
+      verificationKey,
+      provingKey,
+      snarkjs: {
+        zkey,
+        vkey,
+      },
+    },
+  };
+}
 
 export default Home;

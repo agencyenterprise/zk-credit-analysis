@@ -1,22 +1,13 @@
-def validate_cpf<i>(u32[11] cpf) -> bool {
-    u32 mut r = 0;
-    u32 mut f = 0;
-    
-    for u32 j in 0..i {
-        //log("j: {}", j);
-        r = r + (i + 1 - j)*cpf[j];
-    }
-    r = r % 11;
-    f = r > 1 ? 11 - r : 0;
-    //log("cpf[i] is {}, f is {}", cpf[i], f);
-    bool mut result = cpf[i] == f;
-    assert(true == result);
-    return result;
-}
-
-
-def main(private u32 value ) {
-    assert(value > 0);
+// Computes a simple elegibility criteria for a loan
+// data => [0] - balance, [1] - earnings, [2] - expenses, [3] - ratio
+def main(private u32[4] data, u32 loan) {
+    u32 min_score = 500;
+    // balance should be positive
+    assert(data[0] > 0);
+    // total earnings should be more than 2*loan
+    assert(data[1] > 2*loan);
+    // debt ratio should be higher than 500
+    assert(data[3] > min_score);
     return;
 }
 

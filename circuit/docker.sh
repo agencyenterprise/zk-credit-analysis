@@ -1,0 +1,1 @@
+docker build -t zok . && docker run -v /Users/lorenzotomaz/projects/client/50b/zhackathon/zk-credit-analysis/circuit:/home/project -ti zok /bin/bash

@@ -59,7 +59,7 @@ function round(
  * @param circuit True if the data is to be used in a circuit, false otherwise
  * @returns {AggregatedTransactionData}
  */
-const aggregateTransactionData = (
+export const aggregateTransactionData = (
   transactions: Transactions,
   precision: number = 2,
   circuit: boolean = true
@@ -87,4 +87,19 @@ const aggregateTransactionData = (
   };
 };
 
-export default aggregateTransactionData;
+const getTransactions = async (address: string) => {
+  const rawResponse = await fetch("/api/transactions", {
+    method: "POST",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ address }),
+  });
+  const content = await rawResponse.json();
+  const aggregations = aggregateTransactionData(content);
+  console.log(aggregations);
+  return aggregations;
+};
+
+export default getTransactions;

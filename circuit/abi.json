@@ -1,0 +1,24 @@
+{
+  "inputs": [
+    {
+      "name": "data",
+      "public": false,
+      "type": "array",
+      "components": {
+        "size": 4,
+        "type": "u32"
+      }
+    },
+    {
+      "name": "loan",
+      "public": true,
+      "type": "u32"
+    }
+  ],
+  "output": {
+    "type": "tuple",
+    "components": {
+      "elements": []
+    }
+  }
+}
