@@ -1,16 +1,14 @@
-import { readFile } from "fs/promises";
-import Image from "next/image";
-import { FormEvent, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { initialize, ZoKratesProvider } from "zokrates-js";
 import { useMetamask } from "../hooks/useMetamask";
 import getTransactions from "../utils/transactions";
 import { useLoan } from "../hooks/useLoan";
-
+import LoanApproovalModel from "../utils/model";
 const snarkjs = require("snarkjs");
 
 const ZK = (props: any) => {
   const { state } = useMetamask();
-  const { state: loanState } = useLoan();
+  const { state: loanState, dispatch } = useLoan();
   const [zokratesProvider, setZokratesProvider] = useState<ZoKratesProvider>();
   const [isLoading, setIsLoading] = useState(false);
   const [proof, setProof] = useState<{
@@ -25,7 +23,30 @@ const ZK = (props: any) => {
     };
     load();
   }, []);
-
+  const predict = async () => {
+    console.log(loanState);
+    dispatch({ type: "analysis", isAnalyzing: true });
+    try {
+      const loanApprovalModel = new LoanApproovalModel();
+      await loanApprovalModel.loadModel();
+      // const input = [
+      //   -9.91834148e8, 1.27458198e9, 1.29408237e9, 2.54463914e9, 1.14329112e8,
+      //   1.40070348e9, 2.08866067e9, 1.33039893e9, -5.54138048e8, -3.41910013e8,
+      //   -2.5314293e8, -1.21796704e9, -6.42897024e8,
+      // ];
+      // await loanApprovalModel.generateZkProof(input);
+      const input = { ...loanState };
+      console.log(input);
+      const data = await loanApprovalModel.predict(input);
+      console.log(data);
+      console.log("finish");
+    } catch (err) {
+      console.log(err);
+    } finally {
+      console.log("done");
+      dispatch({ type: "analysis", isAnalyzing: false });
+    }
+  };
   //   const toast = useToast();
   const getAggregations = async () => {
     const { wallet, balance } = state;
@@ -149,6 +170,9 @@ const ZK = (props: any) => {
       </button>
       <button className="text-green-300" onClick={verify}>
         {!isLoading ? "Verify" : "Loading"}
+      </button>
+      <button className="text-red-300" onClick={predict}>
+        {!isLoading ? "Predict" : "Loading"}
       </button>
     </div>
   );

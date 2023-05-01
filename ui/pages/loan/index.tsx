@@ -62,9 +62,40 @@ export default function LoanForm() {
         clno,
         debtinc,
         encrypted,
+        experience,
+        income,
+        education,
+        age,
+        creditCard,
+        family,
+        online,
+        securities,
+        zip,
+        ccavg,
+        cdAccount,
       } = loanState ? JSON.parse(loanState) : initialState;
-      dispatchLoan({ type: "history", mortdue, value });
-      dispatchLoan({ type: "income", reason, job, yoj });
+      dispatchLoan({
+        type: "history",
+        mortdue,
+        value,
+        age,
+        zip,
+        family,
+        securities,
+        creditCard,
+        online,
+        cdAccount,
+      });
+      dispatchLoan({
+        type: "income",
+        reason,
+        job,
+        yoj,
+        experience,
+        income,
+        education,
+        ccavg,
+      });
       dispatchLoan({
         type: "credit",
         derog,

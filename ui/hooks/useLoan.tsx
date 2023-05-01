@@ -1,7 +1,27 @@
 import React, { type PropsWithChildren } from "react";
 
-type AddHistory = { type: "history"; mortdue: number; value: number };
-type AddIncome = { type: "income"; reason: Reason; job: Job; yoj: number };
+type AddHistory = {
+  type: "history";
+  mortdue: number;
+  value: number;
+  age: number;
+  zip: number | undefined;
+  family: number;
+  securities: boolean;
+  creditCard: boolean;
+  online: boolean;
+  cdAccount: boolean;
+};
+type AddIncome = {
+  type: "income";
+  reason: Reason;
+  job: Job;
+  yoj: number;
+  experience: number;
+  income: number;
+  education: Education;
+  ccavg: number;
+};
 type AddCredit = {
   type: "credit";
   derog: number;
@@ -11,9 +31,16 @@ type AddCredit = {
   clno: number;
   debtinc: number;
 };
+
+type Education = "Bachelor" | "Master" | "Advanced Degree";
+
+type Analysis = {
+  type: "analysis";
+  isAnalyzing: boolean | undefined;
+};
 type LoanTerms = { type: "loan"; loan: number; encrypted: boolean };
 
-type Action = AddHistory | AddIncome | AddCredit | LoanTerms;
+type Action = AddHistory | AddIncome | AddCredit | LoanTerms | Analysis;
 
 type Dispatch = (action: Action) => void;
 
@@ -33,9 +60,21 @@ export const initialState: State = {
   clno: 0.0,
   debtinc: 0.0,
   encrypted: false,
+  isAnalyzing: false,
+  age: 0,
+  zip: undefined,
+  family: 0,
+  securities: false,
+  creditCard: false,
+  online: false,
+  experience: 0,
+  income: 0,
+  education: "Bachelor",
+  ccavg: 0,
+  cdAccount: false,
 } as const;
 
-type State = {
+export type State = {
   loan: number;
   mortdue: number;
   value: number;
@@ -49,20 +88,63 @@ type State = {
   clno: number;
   debtinc: number;
   encrypted: boolean;
+  isAnalyzing: boolean;
+  age: number;
+  zip: number | undefined;
+  family: number;
+  securities: boolean;
+  creditCard: boolean;
+  online: boolean;
+  experience: number;
+  income: number;
+  education: Education;
+  ccavg: number;
+  cdAccount: boolean;
 };
 
 function loanReducer(state: State, action: Action): State {
+  console.log("loanReducer", action);
   switch (action.type) {
     case "history": {
-      const { mortdue, value } = action;
-      const newState = { ...state, mortdue, value } as State;
+      const {
+        mortdue,
+        value,
+        age,
+        zip,
+        family,
+        securities,
+        creditCard,
+        online,
+        cdAccount,
+      } = action;
+      const newState = {
+        ...state,
+        mortdue,
+        value,
+        age,
+        zip,
+        family,
+        securities,
+        creditCard,
+        online,
+        cdAccount,
+      } as State;
       const info = JSON.stringify(newState);
       window.localStorage.setItem("loanState", info);
       return newState;
     }
     case "income": {
-      const { reason, job, yoj } = action;
-      const newState = { ...state, reason, job, yoj } as State;
+      const { reason, job, yoj, experience, income, education, ccavg } = action;
+      const newState = {
+        ...state,
+        reason,
+        job,
+        yoj,
+        experience,
+        income,
+        education,
+        ccavg,
+      } as State;
       const info = JSON.stringify(newState);
       window.localStorage.setItem("loanState", info);
       return newState;
@@ -88,6 +170,21 @@ function loanReducer(state: State, action: Action): State {
       const info = JSON.stringify(newState);
       window.localStorage.setItem("loanState", info);
       return newState;
+    }
+    case "analysis": {
+      let isAnalyzing;
+      if (action.isAnalyzing !== undefined) {
+        isAnalyzing = action.isAnalyzing;
+      } else {
+        isAnalyzing = !state.isAnalyzing;
+      }
+      const newState = { ...state, isAnalyzing } as State;
+      const info = JSON.stringify(newState);
+      window.localStorage.setItem("loanState", info);
+      return newState;
+    }
+    default: {
+      throw new Error("Unhandled action type");
     }
   }
 }

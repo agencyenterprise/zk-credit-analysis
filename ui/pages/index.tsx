@@ -8,26 +8,29 @@ import ctaStyle from "../components/cta.module.css";
 import ZK from "../components/zk";
 import { readFile } from "fs/promises";
 import getTransactions from "../utils/transactions";
+import Script from "next/script";
+import { initialState, useLoan } from "../hooks/useLoan";
 const Home: NextPage = (props) => {
   const { dispatch, state } = useMetamask();
+  const { state: loanState, dispatch: dispatchLoan } = useLoan();
   const listen = useListen();
-  const handleAddUsdc = async () => {
-    dispatch({ type: "loading" });
+  // const handleAddUsdc = async () => {
+  //   dispatch({ type: "loading" });
 
-    await window.ethereum.request({
-      method: "wallet_watchAsset",
-      params: {
-        type: "ERC20",
-        options: {
-          address: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
-          symbol: "USDC",
-          decimals: 18,
-          image: "https://cryptologos.cc/logos/usd-coin-usdc-logo.svg?v=023",
-        },
-      },
-    });
-    dispatch({ type: "idle" });
-  };
+  //   await window.ethereum.request({
+  //     method: "wallet_watchAsset",
+  //     params: {
+  //       type: "ERC20",
+  //       options: {
+  //         address: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+  //         symbol: "USDC",
+  //         decimals: 18,
+  //         image: "https://cryptologos.cc/logos/usd-coin-usdc-logo.svg?v=023",
+  //       },
+  //     },
+  //   });
+  //   dispatch({ type: "idle" });
+  // };
 
   useEffect(() => {
     if (typeof window !== undefined) {
@@ -55,11 +58,71 @@ const Home: NextPage = (props) => {
       dispatch({ type: "pageLoaded", isMetamaskInstalled, wallet, balance });
 
       wallet && getTransactions(wallet);
+      const loanState = window.localStorage.getItem("loanState");
+      const {
+        loan,
+        mortdue,
+        value,
+        reason,
+        job,
+        yoj,
+        derog,
+        delinq,
+        clage,
+        ninq,
+        clno,
+        debtinc,
+        encrypted,
+        experience,
+        income,
+        education,
+        age,
+        creditCard,
+        family,
+        online,
+        securities,
+        zip,
+        ccavg,
+        cdAccount,
+      } = loanState ? JSON.parse(loanState) : initialState;
+      dispatchLoan({
+        type: "history",
+        mortdue,
+        value,
+        age,
+        zip,
+        family,
+        securities,
+        creditCard,
+        online,
+        cdAccount,
+      });
+      dispatchLoan({
+        type: "income",
+        reason,
+        job,
+        yoj,
+        experience,
+        income,
+        education,
+        ccavg,
+      });
+      dispatchLoan({
+        type: "credit",
+        derog,
+        delinq,
+        clage,
+        ninq,
+        clno,
+        debtinc,
+      });
+      dispatchLoan({ type: "loan", loan, encrypted });
     }
   }, []);
 
   return (
     <>
+      <Script src="/snarkjs.min.js" strategy="beforeInteractive" />
       <Wallet />
       <div className={"container mx-auto min-h-screen pt-5 " + ctaStyle.cta}>
         <CTA />

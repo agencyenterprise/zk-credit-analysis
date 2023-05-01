@@ -38,17 +38,25 @@ export default function CreditForm(props: any) {
   const { nextPage, prevPage, activeStep, steps } = props;
   const formik = useFormik({
     initialValues: {
-      derog: state.derog ? state.derog : 0.0,
-      delinq: state.delinq ? state.delinq : 0.0,
-      clage: state.clage ? state.clage : 0.0,
-      ninq: state.ninq ? state.ninq : 0.0,
-      clno: state.clno ? state.clno : 0.0,
-      debtinc: state.debtinc ? state.debtinc : 0.0,
+      derog: state.derog !== undefined ? state.derog : undefined,
+      delinq: state.delinq !== undefined ? state.delinq : undefined,
+      clage: state.clage !== undefined ? state.clage : undefined,
+      ninq: state.ninq !== undefined ? state.ninq : undefined,
+      clno: state.clno !== undefined ? state.clno : undefined,
+      debtinc: state.debtinc !== undefined ? state.debtinc : undefined,
     },
     validationSchema: validationSchema,
     onSubmit: (values) => {
       const { derog, delinq, clage, ninq, clno, debtinc } = values;
-      dispatch({ type: "credit", derog, delinq, clage, ninq, clno, debtinc });
+      dispatch({
+        type: "credit",
+        derog: derog as number,
+        delinq: delinq as number,
+        clage: clage as number,
+        ninq: ninq as number,
+        clno: clno as number,
+        debtinc: debtinc as number,
+      });
       nextPage();
     },
   });
