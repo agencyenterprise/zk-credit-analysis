@@ -18,6 +18,8 @@
     "@onflow/flow-cadut-generator": "^0.0.1",
     "@tensorflow/tfjs": "^4.4.0",
     "alchemy-sdk": "^2.8.1",
+    "defender-relay-client": "^1.38.0",
+    "ethers": "^5.7.2",
     "formik": "^2.2.9",
     "fs.promises": "^0.1.2",
     "next": "13.2.3",
