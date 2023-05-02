@@ -3,7 +3,7 @@ import { useFormik } from "formik";
 import * as yup from "yup";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
-import { Job, Reason, useLoan } from "../hooks/useLoan";
+import { Job, Reason, useLoan } from "../../hooks/useLoan";
 import { Box, InputLabel, MenuItem, Select } from "@mui/material";
 
 const validationSchema = yup.object({
@@ -25,7 +25,7 @@ const validationSchema = yup.object({
     .required("Years of experience is required"),
   income: yup
     .number()
-    .min(40000, "Income should be at least 40000/yr")
+    .min(20000, "Income should be at least 40000/yr")
     .required("Yearly income is required"),
   education: yup.string().oneOf(["Bachelor", "Master", "Advanced Degree"]),
   ccavg: yup

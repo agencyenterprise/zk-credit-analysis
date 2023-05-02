@@ -9,12 +9,12 @@ import Step from "@mui/material/Step";
 import StepLabel from "@mui/material/StepLabel";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
-import HistoryForm from "../../components/historyForm";
-import { initialState, useLoan } from "../../hooks/useLoan";
-import IncomeForm from "../../components/incomeForm";
-import CreditForm from "../../components/creditForm";
+import HistoryForm from "../../components/form/historyForm";
+import { initialState, stateManagement, useLoan } from "../../hooks/useLoan";
+import IncomeForm from "../../components/form/incomeForm";
+import CreditForm from "../../components/form/creditForm";
+import LoanTermsForm from "../../components/form/loanTermsForm";
 import ctaStyle from "../../components/cta.module.css";
-import LoanTermsForm from "../../components/loanTermsForm";
 const steps = ["Assets", "Income", "Credit History", "Loan Terms", "Review"];
 
 export default function LoanForm() {
@@ -25,88 +25,7 @@ export default function LoanForm() {
   const [activeStep, setActiveStep] = React.useState(0);
   const [skipped, setSkipped] = React.useState(new Set<number>());
   useEffect(() => {
-    if (typeof window !== undefined) {
-      // start by checking if window.ethereum is present, indicating a wallet extension
-      const ethereumProviderInjected = typeof window.ethereum !== "undefined";
-      // this could be other wallets so we can verify if we are dealing with metamask
-      // using the boolean constructor to be explecit and not let this be used as a falsy value (optional)
-      const isMetamaskInstalled =
-        ethereumProviderInjected && Boolean(window.ethereum.isMetaMask);
-
-      const local = window.localStorage.getItem("metamaskState");
-      const loanState = window.localStorage.getItem("loanState");
-      // user was previously connected, start listening to MM
-      if (local) {
-        listen();
-      }
-
-      // local could be null if not present in LocalStorage
-      const { wallet, balance } = local
-        ? JSON.parse(local)
-        : // backup if local storage is empty
-          { wallet: null, balance: null };
-
-      dispatch({ type: "pageLoaded", isMetamaskInstalled, wallet, balance });
-
-      const {
-        loan,
-        mortdue,
-        value,
-        reason,
-        job,
-        yoj,
-        derog,
-        delinq,
-        clage,
-        ninq,
-        clno,
-        debtinc,
-        encrypted,
-        experience,
-        income,
-        education,
-        age,
-        creditCard,
-        family,
-        online,
-        securities,
-        zip,
-        ccavg,
-        cdAccount,
-      } = loanState ? JSON.parse(loanState) : initialState;
-      dispatchLoan({
-        type: "history",
-        mortdue,
-        value,
-        age,
-        zip,
-        family,
-        securities,
-        creditCard,
-        online,
-        cdAccount,
-      });
-      dispatchLoan({
-        type: "income",
-        reason,
-        job,
-        yoj,
-        experience,
-        income,
-        education,
-        ccavg,
-      });
-      dispatchLoan({
-        type: "credit",
-        derog,
-        delinq,
-        clage,
-        ninq,
-        clno,
-        debtinc,
-      });
-      dispatchLoan({ type: "loan", loan, encrypted });
-    }
+    stateManagement(dispatchLoan, listen, dispatch);
   }, []);
   const isStepOptional = (step: number) => {
     return step === 5;

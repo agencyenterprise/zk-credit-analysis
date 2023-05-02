@@ -18,7 +18,7 @@ type Action =
   | LoadingAction
   | IdleAction;
 
-type Dispatch = (action: Action) => void;
+export type Dispatch = (action: Action) => void;
 
 type Status = "loading" | "idle" | "pageNotLoaded";
 

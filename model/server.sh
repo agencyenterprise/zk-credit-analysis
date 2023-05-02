@@ -1,1 +1,0 @@
-docker build -t text_moderation_fhe_server -f Dockerfile.server . && docker run -p 5000:5000 -it text_moderation_fhe_server

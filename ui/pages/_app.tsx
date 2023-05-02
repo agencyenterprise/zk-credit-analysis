@@ -6,6 +6,9 @@ import { StyledEngineProvider } from "@mui/material/styles";
 import { LoanProvider, useLoan } from "../hooks/useLoan";
 import MainLoader from "../components/mainLoader";
 import { PropsWithChildren } from "react";
+import { ToastContainer } from "react-toastify";
+
+import "react-toastify/dist/ReactToastify.css";
 function MyApp({ Component, pageProps }: AppProps) {
   return (
     <MetamaskProvider>
@@ -24,6 +27,18 @@ function Home({ children }: PropsWithChildren) {
   return (
     <div>
       <MainLoader isLoading={loanState.isAnalyzing} />
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+      />
       {children}
     </div>
   );

@@ -37,15 +37,20 @@ interface AggregatedTransactionData {
  * @param circuit True if the number is to be used in a circuit, false otherwise
  * @returns
  */
-function round(
-  x: number,
-  precision: number = 2,
-  circuit: boolean = false
-): number {
-  return circuit
-    ? Math.ceil(+x.toPrecision(precision) * 10 ** (precision + 2))
-    : +x.toPrecision(precision);
+function round(x: number): number {
+  return Math.round(x);
 }
+
+/**
+ * Get real time ETH price in USD
+ * @returns
+ */
+const ethToUSD = async (): Promise<number> => {
+  const url = "https://min-api.cryptocompare.com/data/price?fsym=ETH&tsyms=USD";
+  const response = await fetch(url);
+  const data = await response.json();
+  return data.USD;
+};
 
 /**
  * Aggregates transaction data into a single object containing the following fields:
@@ -61,6 +66,7 @@ function round(
  */
 export const aggregateTransactionData = (
   transactions: Transactions,
+  usdRate: number,
   precision: number = 2,
   circuit: boolean = true
 ): AggregatedTransactionData => {
@@ -70,24 +76,25 @@ export const aggregateTransactionData = (
   const from_values = from_transfers
     .filter((v) => validTransaction(v))
     .map((v) => v.value);
-  const expenses = from_values.reduce((acc, v) => acc + v, 0);
+  const expenses = from_values.reduce((acc, v) => acc + v, 0) * usdRate;
   const to_values = to_transfers
     .filter((v) => validTransaction(v))
     .map((v) => v.value);
-  const earnings = to_values.reduce((acc, v) => acc + v, 0);
+  const earnings = to_values.reduce((acc, v) => acc + v, 0) * usdRate;
   const balanceRatio = earnings / expenses;
   const averageExpense = expenses / from_values.length;
   const averageEarning = earnings / to_values.length;
   return {
-    expenses: round(expenses, precision, circuit),
-    earnings: round(earnings, precision, circuit),
-    balanceRatio: round(balanceRatio, precision, circuit),
-    averageEarning: round(averageEarning, precision, circuit),
-    averageExpense: round(averageExpense, precision, circuit),
+    expenses: round(expenses),
+    earnings: round(earnings),
+    balanceRatio: round(balanceRatio * 10 ** 4),
+    averageEarning: round(averageEarning),
+    averageExpense: round(averageExpense),
   };
 };
 
 const getTransactions = async (address: string) => {
+  const usdRate = await ethToUSD();
   const rawResponse = await fetch("/api/transactions", {
     method: "POST",
     headers: {
@@ -97,7 +104,7 @@ const getTransactions = async (address: string) => {
     body: JSON.stringify({ address }),
   });
   const content = await rawResponse.json();
-  const aggregations = aggregateTransactionData(content);
+  const aggregations = aggregateTransactionData(content, usdRate);
   console.log(aggregations);
   return aggregations;
 };

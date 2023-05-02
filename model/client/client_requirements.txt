@@ -1,5 +1,0 @@
-grequests
-requests
-python-multipart
-msgpack
-pandas

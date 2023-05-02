@@ -3,7 +3,7 @@ import { useFormik } from "formik";
 import * as yup from "yup";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
-import { useLoan } from "../hooks/useLoan";
+import { useLoan } from "../../hooks/useLoan";
 import { Box, Checkbox, FormControlLabel } from "@mui/material";
 
 const validationSchema = yup.object({

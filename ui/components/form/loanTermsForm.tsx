@@ -3,13 +3,14 @@ import { useFormik } from "formik";
 import * as yup from "yup";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
-import { useLoan } from "../hooks/useLoan";
+import { useLoan } from "../../hooks/useLoan";
 import { Box, Checkbox, FormControlLabel, InputLabel } from "@mui/material";
 
 const validationSchema = yup.object({
   loan: yup
     .number()
     .min(100, "Loan be at least 100 USD")
+    .max(10001, "Loan should be up to 10000 USD")
     .required("Loan value is required"),
   encrypted: yup.boolean().required("Encryption is required"),
 });

@@ -1,5 +1,5 @@
 import React, { type PropsWithChildren } from "react";
-
+import { Dispatch as MetamaskDispatch } from "./useMetamask";
 type AddHistory = {
   type: "history";
   mortdue: number;
@@ -208,4 +208,93 @@ function useLoan() {
   return context;
 }
 
-export { LoanProvider, useLoan };
+const stateManagement = (
+  dispatchLoan: Dispatch,
+  listen: () => void,
+  dispatch: MetamaskDispatch
+) => {
+  if (typeof window !== undefined) {
+    // start by checking if window.ethereum is present, indicating a wallet extension
+    const ethereumProviderInjected = typeof window.ethereum !== "undefined";
+    // this could be other wallets so we can verify if we are dealing with metamask
+    // using the boolean constructor to be explecit and not let this be used as a falsy value (optional)
+    const isMetamaskInstalled =
+      ethereumProviderInjected && Boolean(window.ethereum.isMetaMask);
+
+    const local = window.localStorage.getItem("metamaskState");
+    const loanState = window.localStorage.getItem("loanState");
+    // user was previously connected, start listening to MM
+    if (local) {
+      listen();
+    }
+
+    // local could be null if not present in LocalStorage
+    const { wallet, balance } = local
+      ? JSON.parse(local)
+      : // backup if local storage is empty
+        { wallet: null, balance: null };
+
+    dispatch({ type: "pageLoaded", isMetamaskInstalled, wallet, balance });
+
+    const {
+      loan,
+      mortdue,
+      value,
+      reason,
+      job,
+      yoj,
+      derog,
+      delinq,
+      clage,
+      ninq,
+      clno,
+      debtinc,
+      encrypted,
+      experience,
+      income,
+      education,
+      age,
+      creditCard,
+      family,
+      online,
+      securities,
+      zip,
+      ccavg,
+      cdAccount,
+    } = loanState ? JSON.parse(loanState) : initialState;
+    dispatchLoan({
+      type: "history",
+      mortdue,
+      value,
+      age,
+      zip,
+      family,
+      securities,
+      creditCard,
+      online,
+      cdAccount,
+    });
+    dispatchLoan({
+      type: "income",
+      reason,
+      job,
+      yoj,
+      experience,
+      income,
+      education,
+      ccavg,
+    });
+    dispatchLoan({
+      type: "credit",
+      derog,
+      delinq,
+      clage,
+      ninq,
+      clno,
+      debtinc,
+    });
+    dispatchLoan({ type: "loan", loan, encrypted });
+  }
+};
+
+export { LoanProvider, useLoan, stateManagement };
