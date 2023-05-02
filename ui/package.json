@@ -14,6 +14,7 @@
     "@emotion/server": "^11.10.0",
     "@emotion/styled": "^11.10.6",
     "@mui/material": "^5.12.2",
+    "@mui/x-data-grid": "^6.3.0",
     "@onflow/fcl": "^1.3.2",
     "@onflow/flow-cadut-generator": "^0.0.1",
     "@tensorflow/tfjs": "^4.4.0",
