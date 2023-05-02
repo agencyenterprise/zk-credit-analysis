@@ -31,6 +31,10 @@ const validationSchema = yup.object({
   ccavg: yup
     .number()
     .min(0, "Credit card average expendings per month should be at least 0")
+    .max(
+      4700,
+      "Credit card average expendings per month should be at most 4700"
+    )
     .required(),
 });
 
@@ -75,9 +79,9 @@ export default function IncomeForm(props: any) {
   });
 
   return (
-    <form onSubmit={formik.handleSubmit}>
-      <div className="flex flex-col space-y-2 justify-center max-w-[600px]">
-        <div className="flex flex-col space-y-3 min-h-[400px] w-full justify-center">
+    <form className="h-full" onSubmit={formik.handleSubmit}>
+      <div className="flex flex-col space-y-10 justify-between  max-w-[600px] pt-10 h-full">
+        <div className="flex flex-col space-y-5 min-h-[650px] w-full">
           <InputLabel className="text-left pt-6 text-xs" id="reason-label">
             Reason for loan request
           </InputLabel>
@@ -202,7 +206,7 @@ export default function IncomeForm(props: any) {
           />
         </div>
 
-        <div className="flex flex-col justify-between">
+        <div className="flex flex-col justify-between pb-5">
           <Box sx={{ display: "flex", flexDirection: "row", pt: 2 }}>
             {activeStep !== 0 && (
               <Button color="inherit" onClick={prevPage} sx={{ mr: 1 }}>

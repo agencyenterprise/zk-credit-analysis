@@ -12,7 +12,9 @@ const validationSchema = yup.object({
     .min(100, "Loan be at least 100 USD")
     .max(10001, "Loan should be up to 10000 USD")
     .required("Loan value is required"),
-  encrypted: yup.boolean().required("Encryption is required"),
+  description: yup
+    .string()
+    .min(100, "Description should be at least 100 characters"),
 });
 
 export default function LoanTermsForm(props: any) {
@@ -21,13 +23,12 @@ export default function LoanTermsForm(props: any) {
   const formik = useFormik({
     initialValues: {
       loan: state.loan ? state.loan : 0,
-      encrypted: state.encrypted != undefined ? state.encrypted : true,
+      description: state.description != undefined ? state.description : "",
     },
     validationSchema: validationSchema,
     onSubmit: (values) => {
-      let { loan, encrypted: e } = values;
-      let encrypted = e as boolean;
-      dispatch({ type: "loan", loan, encrypted });
+      let { loan, description } = values;
+      dispatch({ type: "loan", loan, description });
       nextPage();
     },
   });
@@ -35,9 +36,9 @@ export default function LoanTermsForm(props: any) {
     console.log(state);
   }, [state]);
   return (
-    <form onSubmit={formik.handleSubmit}>
-      <div className="flex flex-col space-y-5 justify-center w-full pt-10">
-        <div className="space-y-5 min-h-[400px]">
+    <form className="h-full" onSubmit={formik.handleSubmit}>
+      <div className="flex flex-col space-y-10 justify-between  max-w-[600px] pt-10 h-full">
+        <div className="flex flex-col space-y-5 min-h-[650px] w-full">
           <TextField
             fullWidth
             id="loan"
@@ -49,23 +50,23 @@ export default function LoanTermsForm(props: any) {
             error={formik.touched.loan && Boolean(formik.errors.loan)}
             helperText={formik.touched.loan && formik.errors.loan}
           />
-          <div className="flex justify-start">
-            <FormControlLabel
-              control={
-                <Checkbox
-                  defaultChecked={formik.values.encrypted}
-                  id="encrypted"
-                  name="encrypted"
-                  value={formik.values.encrypted}
-                  onChange={formik.handleChange}
-                />
-              }
-              label="Encrypt loan data"
-            />
-          </div>
+          <TextField
+            fullWidth
+            multiline
+            rows={10}
+            id="description"
+            name="description"
+            label="Why do you need this loan?"
+            value={formik.values.description}
+            onChange={formik.handleChange}
+            error={
+              formik.touched.description && Boolean(formik.errors.description)
+            }
+            helperText={formik.touched.description && formik.errors.description}
+          />
         </div>
 
-        <div className="flex flex-col justify-between">
+        <div className="flex flex-col justify-between pb-5">
           <Box sx={{ display: "flex", flexDirection: "row", pt: 2 }}>
             {activeStep !== 0 && (
               <Button color="inherit" onClick={prevPage} sx={{ mr: 1 }}>
@@ -74,7 +75,7 @@ export default function LoanTermsForm(props: any) {
             )}
             <Box sx={{ flex: "1 1 auto" }} />
             <Button type="submit">
-              {activeStep === steps.length - 1 ? "Finish" : "Next"}
+              {activeStep === steps.length - 1 ? "Request Loan" : "Next"}
             </Button>
           </Box>
         </div>

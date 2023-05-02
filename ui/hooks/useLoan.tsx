@@ -38,9 +38,18 @@ type Analysis = {
   type: "analysis";
   isAnalyzing: boolean | undefined;
 };
-type LoanTerms = { type: "loan"; loan: number; encrypted: boolean };
 
-type Action = AddHistory | AddIncome | AddCredit | LoanTerms | Analysis;
+type LoanResult = { type: "loanResult"; proofs: string[]; score: number };
+
+type LoanTerms = { type: "loan"; loan: number; description: string };
+
+type Action =
+  | AddHistory
+  | AddIncome
+  | AddCredit
+  | LoanTerms
+  | Analysis
+  | LoanResult;
 
 type Dispatch = (action: Action) => void;
 
@@ -59,7 +68,7 @@ export const initialState: State = {
   ninq: 0.0,
   clno: 0.0,
   debtinc: 0.0,
-  encrypted: false,
+  description: "",
   isAnalyzing: false,
   age: 0,
   zip: undefined,
@@ -72,7 +81,9 @@ export const initialState: State = {
   education: "Bachelor",
   ccavg: 0,
   cdAccount: false,
-} as const;
+  proofs: [],
+  score: 0.0,
+};
 
 export type State = {
   loan: number;
@@ -87,7 +98,7 @@ export type State = {
   ninq: number;
   clno: number;
   debtinc: number;
-  encrypted: boolean;
+  description: string;
   isAnalyzing: boolean;
   age: number;
   zip: number | undefined;
@@ -100,6 +111,8 @@ export type State = {
   education: Education;
   ccavg: number;
   cdAccount: boolean;
+  proofs: string[];
+  score: number;
 };
 
 function loanReducer(state: State, action: Action): State {
@@ -165,8 +178,8 @@ function loanReducer(state: State, action: Action): State {
       return newState;
     }
     case "loan": {
-      const { loan, encrypted } = action;
-      const newState = { ...state, loan, encrypted } as State;
+      const { loan, description } = action;
+      const newState = { ...state, loan, description } as State;
       const info = JSON.stringify(newState);
       window.localStorage.setItem("loanState", info);
       return newState;
@@ -179,6 +192,13 @@ function loanReducer(state: State, action: Action): State {
         isAnalyzing = !state.isAnalyzing;
       }
       const newState = { ...state, isAnalyzing } as State;
+      const info = JSON.stringify(newState);
+      window.localStorage.setItem("loanState", info);
+      return newState;
+    }
+    case "loanResult": {
+      const { proofs, score } = action;
+      const newState = { ...state, proofs, score } as State;
       const info = JSON.stringify(newState);
       window.localStorage.setItem("loanState", info);
       return newState;
@@ -249,7 +269,7 @@ const stateManagement = (
       ninq,
       clno,
       debtinc,
-      encrypted,
+      description,
       experience,
       income,
       education,
@@ -293,7 +313,7 @@ const stateManagement = (
       clno,
       debtinc,
     });
-    dispatchLoan({ type: "loan", loan, encrypted });
+    dispatchLoan({ type: "loan", loan, description });
   }
 };
 

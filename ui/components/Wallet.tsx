@@ -2,14 +2,15 @@ import Link from "next/link";
 import { useListen } from "../hooks/useListen";
 import { useMetamask } from "../hooks/useMetamask";
 import { Loading } from "./Loading";
-
+import "../flow/config";
+import { useAuth } from "../hooks/FlowAuthContext";
 export default function Wallet() {
   const {
     dispatch,
     state: { status, isMetamaskInstalled, wallet, balance },
   } = useMetamask();
   const listen = useListen();
-
+  const { currentUser, logOut, logIn, makeLoanRequest } = useAuth();
   const showInstallMetamask =
     status !== "pageNotLoaded" && !isMetamaskInstalled;
   const showConnectButton =
@@ -53,9 +54,13 @@ export default function Wallet() {
               <div className="text-gray-800 dark:text-white focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-4 lg:px-5 py-1 lg:py-2.5 mr-2">
                 <button
                   onClick={handleConnect}
-                  className="inline-flex w-full items-center justify-center rounded-md border border-transparent text-gray-700 hover:text-gray-400 px-5 text-base font-medium  sm:w-auto"
+                  className="inline-flex w-full items-center justify-center rounded-md border border-transparent text-gray-700 hover:text-gray-400 px-5 text-sm font-medium  sm:w-auto"
                 >
-                  {status === "loading" ? <Loading /> : "Connect Wallet"}
+                  {status === "loading" ? (
+                    <Loading />
+                  ) : (
+                    "Connect Metamask Wallet"
+                  )}
                 </button>
               </div>
             )}
@@ -63,9 +68,37 @@ export default function Wallet() {
               <div className="text-gray-800 dark:text-white focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-4 lg:px-5 py-1 lg:py-2.5 mr-2">
                 <button
                   onClick={handleDisconnect}
-                  className="inline-flex w-full items-center justify-center rounded-md border border-transparent text-gray-700 hover:text-gray-400 px-5 text-base font-medium  sm:w-auto"
+                  className="inline-flex w-full items-center justify-center rounded-md border border-transparent text-gray-700 hover:text-gray-400 px-5 text-sm font-medium  sm:w-auto"
                 >
-                  {status === "loading" ? <Loading /> : "Disconnet Wallet"}
+                  {status === "loading" ? (
+                    <Loading />
+                  ) : (
+                    "Disconnet Matamask Wallet"
+                  )}
+                </button>
+              </div>
+            )}
+            {!currentUser?.addr && (
+              <div className="text-gray-800 dark:text-white focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-4 lg:px-5 py-1 lg:py-2.5 mr-2">
+                <button
+                  onClick={logIn}
+                  className="inline-flex w-full items-center justify-center rounded-md border border-transparent text-gray-700 hover:text-gray-400 px-5 text-sm font-medium  sm:w-auto"
+                >
+                  {status === "loading" ? <Loading /> : "Connect Flow Wallet"}
+                </button>
+              </div>
+            )}
+            {currentUser?.addr && (
+              <div className="text-gray-800 dark:text-white focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-4 lg:px-5 py-1 lg:py-2.5 mr-2">
+                <button
+                  onClick={logOut}
+                  className="inline-flex w-full items-center justify-center rounded-md border border-transparent text-gray-700 hover:text-gray-400 px-5 text-sm font-medium  sm:w-auto"
+                >
+                  {status === "loading" ? (
+                    <Loading />
+                  ) : (
+                    "Disconnect Flow Wallet"
+                  )}
                 </button>
               </div>
             )}

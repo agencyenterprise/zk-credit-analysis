@@ -15,9 +15,15 @@ import IncomeForm from "../../components/form/incomeForm";
 import CreditForm from "../../components/form/creditForm";
 import LoanTermsForm from "../../components/form/loanTermsForm";
 import ctaStyle from "../../components/cta.module.css";
-const steps = ["Assets", "Income", "Credit History", "Loan Terms", "Review"];
+import Script from "next/script";
+import ZK from "../../components/zk";
+import { readFile } from "fs/promises";
+import { NextPage } from "next";
 
-export default function LoanForm() {
+const steps = ["Assets", "Income", "Credit History", "Loan Terms"];
+
+const LoanForm: NextPage = (props) => {
+  const { predict } = ZK(props);
   const { dispatch } = useMetamask();
   const { dispatch: dispatchLoan } = useLoan();
   const listen = useListen();
@@ -102,7 +108,7 @@ export default function LoanForm() {
       case 3:
         return (
           <LoanTermsForm
-            nextPage={handleNext}
+            nextPage={predict}
             prevPage={handleBack}
             activeStep={activeStep}
             steps={steps}
@@ -117,32 +123,14 @@ export default function LoanForm() {
   const FormSteps = (props: any) => {
     const { activeStep } = props;
     return (
-      <div className="min-h-[700px] flex-col justify-center">
+      <div className="min-h-[700px]">
         <StepForm activeStep={activeStep}></StepForm>
-        <Box sx={{ display: "flex", flexDirection: "row", pt: 2 }}>
-          <Button
-            color="inherit"
-            disabled={activeStep === 0}
-            onClick={handleBack}
-            sx={{ mr: 1 }}
-          >
-            Back
-          </Button>
-          <Box sx={{ flex: "1 1 auto" }} />
-          {isStepOptional(activeStep) && (
-            <Button color="inherit" onClick={handleSkip} sx={{ mr: 1 }}>
-              Skip
-            </Button>
-          )}
-          <Button onClick={handleNext}>
-            {activeStep === steps.length - 1 ? "Finish" : "Next"}
-          </Button>
-        </Box>
       </div>
     );
   };
   return (
     <>
+      <Script src="/snarkjs.min.js" strategy="beforeInteractive" />
       <Wallet />
       <div
         className={
@@ -178,4 +166,37 @@ export default function LoanForm() {
       </div>
     </>
   );
+};
+
+export async function getStaticProps() {
+  // zokrates artifacts
+  const source = (await readFile("../circuit/balance.zok")).toString();
+  const program = (await readFile("../circuit/balance")).toString("hex");
+  const verificationKey = JSON.parse(
+    (await readFile("../circuit/verification.key")).toString()
+  );
+  const provingKey = (await readFile("../circuit/proving.key")).toString("hex");
+
+  // snarkjs artifacts
+  const zkey = (await readFile("../circuit/snarkjs/balance.zkey")).toString(
+    "hex"
+  );
+  const vkey = JSON.parse(
+    (await readFile("../circuit/snarkjs/verification_key.json")).toString()
+  );
+
+  return {
+    props: {
+      source,
+      program,
+      verificationKey,
+      provingKey,
+      snarkjs: {
+        zkey,
+        vkey,
+      },
+    },
+  };
 }
+
+export default LoanForm;

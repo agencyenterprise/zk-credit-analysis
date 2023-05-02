@@ -1,14 +1,18 @@
 import { useEffect, useState } from "react";
 import { initialize, ZoKratesProvider } from "zokrates-js";
 import { useMetamask } from "../hooks/useMetamask";
-import getTransactions from "../utils/transactions";
+import getTransactions, { getAggregatedFlowData } from "../utils/transactions";
 import { useLoan } from "../hooks/useLoan";
 import LoanApproovalModel from "../utils/model";
 const snarkjs = require("snarkjs");
 import { toast } from "react-toastify";
+import { useAuth } from "../hooks/FlowAuthContext";
+import { useRouter } from "next/navigation";
 const ZK = (props: any) => {
+  const { push } = useRouter();
   const { state } = useMetamask();
   const { state: loanState, dispatch } = useLoan();
+  const { currentUser, makeLoanRequest, getFlowBalance } = useAuth();
   const [zokratesProvider, setZokratesProvider] = useState<ZoKratesProvider>();
   const [proof, setProof] = useState<{
     zokratesProof: any;
@@ -22,7 +26,7 @@ const ZK = (props: any) => {
     };
     load();
   }, []);
-  const success = (msg: any) => {
+  const success = async (msg: any) => {
     toast.success(msg, {
       position: "top-right",
       autoClose: 3000,
@@ -33,8 +37,9 @@ const ZK = (props: any) => {
       progress: undefined,
       theme: "light",
     });
+    await sleep(3000);
   };
-  const info = (msg: string) => {
+  const info = async (msg: string) => {
     toast.info(msg, {
       position: "top-right",
       autoClose: 2000,
@@ -45,8 +50,9 @@ const ZK = (props: any) => {
       progress: undefined,
       theme: "light",
     });
+    await sleep(3000);
   };
-  const error = (msg: any) => {
+  const error = async (msg: any) => {
     toast.error(msg, {
       position: "top-right",
       autoClose: 3000,
@@ -57,15 +63,34 @@ const ZK = (props: any) => {
       progress: undefined,
       theme: "light",
     });
+    await sleep(3000);
+  };
+  const sleep = (ms: number) => {
+    return new Promise((resolve) => setTimeout(resolve, ms));
   };
   const predict = async () => {
     console.log(loanState);
     dispatch({ type: "analysis", isAnalyzing: true });
     try {
-      info("Computing proof of balance...");
-      setProof(undefined);
-      await computeProofOfBalance();
-      info("Computing loan approval...");
+      await info("Computing proof of balance for Ethereum...");
+      const ethAggragations = await getAggregations();
+      const { snarkjsProof: ethBalanceProof } = await computeProofOfBalance(
+        ethAggragations
+      );
+      await info("Computing proof of balance for Flow...");
+      const { ccavg, loan, income } = loanState;
+      const flowBalance = await getFlowBalance();
+      console.log(flowBalance);
+      const flowAggregations = getAggregatedFlowData(
+        ccavg,
+        income,
+        loan,
+        flowBalance
+      );
+      const { snarkjsProof: flowBalanceProof } = await computeProofOfBalance(
+        flowAggregations
+      );
+      await info("Computing loan approval...");
       const loanApprovalModel = new LoanApproovalModel();
       await loanApprovalModel.loadModel();
       const input = { ...loanState };
@@ -73,15 +98,20 @@ const ZK = (props: any) => {
       if (data?.prediction == 0) {
         throw new Error("Not approved");
       }
-      success(
-        <div className="flex flex-col">
-          <p className="text-sm">You are approved for a loan!</p>
-          <p className="text-xs">We will contat you in a few weeks!</p>
-        </div>
-      );
+      const proofs = [
+        JSON.stringify(ethBalanceProof),
+        JSON.stringify(flowBalanceProof),
+        JSON.stringify(data?.proof),
+      ];
+      console.log(data);
+      const score = (data?.predictions || [])[1] || 0.0;
+      dispatch({ type: "loanResult", proofs, score });
+      await info("In order to continue, please sign the next transaction.");
+      await makeLoanRequest(proofs, score);
+      push("/");
     } catch (err: any) {
       console.log(err);
-      error(
+      await error(
         <div className="flex flex-col">
           <p className="text-sm">You are not elegible for a loan this time.</p>
           <p className="text-xs">Try again in a few weeks</p>
@@ -91,7 +121,9 @@ const ZK = (props: any) => {
       dispatch({ type: "analysis", isAnalyzing: false });
     }
   };
-  const getAggregations = async () => {
+  const getAggregations = async (): Promise<
+    [[string, string, string, string], string]
+  > => {
     const { wallet, balance } = state;
     const { loan } = loanState;
     const parsedBalance = (+balance! + 1).toFixed(0);
@@ -107,10 +139,23 @@ const ZK = (props: any) => {
       loan.toFixed(0),
     ];
   };
-  const computeProofOfBalance = async () => {
+  const flowTransactionData = () => {
+    const { loan, ccavg, income } = loanState;
+    const inputs = getAggregatedFlowData(
+      ccavg,
+      income,
+      loan,
+      currentUser.balance
+    );
+    return inputs;
+  };
+  const computeProofOfBalance = async (
+    inputs: [[string, string, string, string], string]
+  ) => {
     try {
+      console.log(currentUser);
       const program = zokratesProvider!.compile(props.source);
-      const inputs = await getAggregations();
+      //const inputs = await getAggregations();
       const output = zokratesProvider!.computeWitness(program, inputs, {
         snarkjs: true,
       });
@@ -127,11 +172,12 @@ const ZK = (props: any) => {
         zkey,
         output!.snarkjs!.witness
       );
-
-      setProof({ zokratesProof, snarkjsProof });
       console.log(zokratesProof);
-      success("Your proof of balance was computed with success!");
+      await success("Your proof of balance was computed with success!");
+      return { zokratesProof, snarkjsProof };
     } catch (e) {
+      console.log(inputs);
+      console.log(e);
       throw new Error(
         "You are not elegible for a loan this time. Try again in a few weeks!"
       );
@@ -151,35 +197,16 @@ const ZK = (props: any) => {
         zokratesProof
       );
       if (snarkjsVerifier && zokratesVerifier) {
-        success("Proof is valid!!");
+        await success("Proof is valid!!");
       } else {
         throw new Error("Verification failed :(");
       }
     } catch (e) {
-      error("Proof verification failed :(");
+      await error("Proof verification failed :(");
     }
   };
 
-  return (
-    <div className="flex flex-col justify-center space-y-10">
-      {proof?.zokratesProof && (
-        <button
-          className="text-green-300"
-          onClick={verify}
-          disabled={loanState.isAnalyzing}
-        >
-          {!loanState.isAnalyzing ? "Verify" : "Loading"}
-        </button>
-      )}
-      <button
-        className="text-red-300"
-        onClick={predict}
-        disabled={loanState.isAnalyzing}
-      >
-        {!loanState.isAnalyzing ? "Predict" : "Loading"}
-      </button>
-    </div>
-  );
+  return { predict };
 };
 
 export default ZK;

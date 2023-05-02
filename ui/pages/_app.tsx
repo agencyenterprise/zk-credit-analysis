@@ -9,16 +9,22 @@ import { PropsWithChildren } from "react";
 import { ToastContainer } from "react-toastify";
 
 import "react-toastify/dist/ReactToastify.css";
+import FlowProvider from "../hooks/FlowAuthContext";
+import TransactionProvider from "../hooks/TransactionContext";
 function MyApp({ Component, pageProps }: AppProps) {
   return (
-    <MetamaskProvider>
-      <LoanProvider>
-        <StyledEngineProvider injectFirst></StyledEngineProvider>
-        <Home>
-          <Component {...pageProps} />
-        </Home>
-      </LoanProvider>
-    </MetamaskProvider>
+    <TransactionProvider>
+      <FlowProvider>
+        <MetamaskProvider>
+          <LoanProvider>
+            <StyledEngineProvider injectFirst></StyledEngineProvider>
+            <Home>
+              <Component {...pageProps} />
+            </Home>
+          </LoanProvider>
+        </MetamaskProvider>
+      </FlowProvider>
+    </TransactionProvider>
   );
 }
 

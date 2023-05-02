@@ -93,6 +93,27 @@ export const aggregateTransactionData = (
   };
 };
 
+export const getAggregatedFlowData = (
+  ccavg: number,
+  income: number,
+  loan: number,
+  balance: string
+): [[string, string, string, string], string] => {
+  const monthlyIncome = income / 12;
+  const balanceRatio = income / ccavg;
+  let parsedBalance =
+    parseInt(balance) > 10000 ? 10000 : parseInt(balance) * 10 ** 3;
+  return [
+    [
+      round(parsedBalance).toFixed(0),
+      round(monthlyIncome).toFixed(0),
+      round(ccavg).toFixed(0),
+      round(balanceRatio * 10 ** 4).toFixed(0),
+    ],
+    round(loan).toFixed(0),
+  ];
+};
+
 const getTransactions = async (address: string) => {
   const usdRate = await ethToUSD();
   const rawResponse = await fetch("/api/transactions", {

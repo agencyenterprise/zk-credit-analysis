@@ -1,8 +1,6 @@
 import * as tf from "@tensorflow/tfjs";
 import calculateProof, { IProofInput } from "../proof";
 import { State } from "../../hooks/useLoan";
-import { StandardScaler, setBackend } from "scikitjs";
-setBackend(tf);
 
 const scalerAVG = () => {
   return [
@@ -44,6 +42,10 @@ export default class LoanApproovalModel {
         return 0;
     }
   }
+  precisionRound(number: number, precision: number) {
+    var factor = Math.pow(10, precision);
+    return Math.round(number * factor) / factor;
+  }
   processBoolean(value: boolean) {
     return value ? 1 : 0;
   }
@@ -77,16 +79,6 @@ export default class LoanApproovalModel {
       this.processBoolean(online),
       this.processBoolean(creditCard),
     ];
-    // const scaler = new StandardScaler();
-    // const expected = scaler.fitTransform(processedInput);
-    // return expected.dataSync();
-    // console.log("processedInput.map(computeScaling)");
-    // console.log(processedInput.map(computeScaling));
-    // return [
-    //   1.61473131e9, 3.15215032e8, 2.48108804e8, 2.17569569e9, 1.06051854e9,
-    //   5.29619225e8, 1.51917401e9, 1.40654259e8, 5.2098112e9, -3.41910013e8,
-    //   -2.5314293e8, -1.21796704e9, -6.42897024e8,
-    // ];
     return processedInput.map(computeScaling);
   }
   async generateZkInput(input: number[]): Promise<IProofInput> {
@@ -99,24 +91,11 @@ export default class LoanApproovalModel {
       in: [...input].map(
         (v) => +parseInt(parseFloat((v * 10 ** 8).toString()).toString())
       ),
-      // in: [
-      //   -534055221, -1516303690, -1495180471, -971174906, -952334978,
-      //   1400703477, -644875306, -1049090410, 764731694, -341910013, -253142930,
-      //   821040280, -642897023,
-      // ],
-      // in: [
-      //   1614731311, 315215031, 248108803, 2175695693, 1060518544, 529619225,
-      //   1519174010, 140654258, 5209811197, -341910013, -253142930, -1217967039,
-      //   -642897023,
-      // ],
     };
-    console.log(circuitInput);
     return circuitInput;
   }
   async generateZkProof(input: number[]) {
     const circuitInput = await this.generateZkInput(input);
-    console.log("circuitInput");
-    console.log(circuitInput);
     const { proof, result } = await calculateProof(circuitInput);
     console.log(
       "The prediction computation has generated the following proof:"
@@ -131,25 +110,35 @@ export default class LoanApproovalModel {
       console.log("Model not loaded");
       return;
     }
-    const pinput: any = this.preProcess(input);
-    console.log("pinput");
-    console.log(pinput);
-    let number;
-    let maxProb = 0;
-    const tensor = tf.tensor([pinput]);
+    const preprocessedInput: any = this.preProcess(input);
+    const tensor = tf.tensor([preprocessedInput]);
     const output = this.model!.predict(tensor) as tf.Tensor;
     const predictions = Array.from(output.dataSync());
-    predictions.forEach((prob, num) => {
-      if (prob > maxProb) {
-        maxProb = prob;
-        number = num;
-      }
-    });
-    const proof = await this.generateZkProof(pinput);
+    // let number;
+    // let maxProb = 0;
+    // predictions.forEach((prob, num) => {
+    //   if (prob > maxProb) {
+    //     maxProb = prob;
+    //     number = num;
+    //   }
+    // });
+    const { index, maxProb } = predictions.reduce(
+      (acc, prob, index) => {
+        return acc.maxProb < prob
+          ? {
+              index,
+              maxProb: prob,
+            }
+          : acc;
+      },
+      { index: 0, maxProb: 0 }
+    );
+    const proof = await this.generateZkProof(preprocessedInput);
     return {
-      prediction: number,
+      predictions: predictions.map((v) => this.precisionRound(v, 6)),
+      prediction: index,
       proof: proof,
-      predClass: number === 1 ? "Approved" : "Rejected",
+      predClass: index === 1 ? "Approved" : "Rejected",
     };
   }
 }
