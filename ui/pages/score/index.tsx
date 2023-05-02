@@ -11,11 +11,11 @@ import { DataGrid, GridColDef, GridValueGetterParams } from '@mui/x-data-grid'
 import ZkCreditScore from '../../public/ZkCreditScore.json'
 
 const columns: GridColDef[] = [
-  { field: 'date', headerName: 'Date', width: 70 },
-  { field: 'proof1', headerName: 'Proof 1', width: 130 },
-  { field: 'proof2', headerName: 'Proof 2', width: 130 },
-  { field: 'proof2', headerName: 'Proof 3', width: 130 },
-  { field: 'score', headerName: 'Score', width: 130 },
+  { field: 'date', headerName: 'Date', width: 100 },
+  { field: 'proof1', headerName: 'Proof 1', width: 100 },
+  { field: 'proof2', headerName: 'Proof 2', width: 100 },
+  { field: 'proof2', headerName: 'Proof 3', width: 100 },
+  { field: 'score', headerName: 'Score', width: 100 },
 ];
 const MyScoresPage = ({ allLoanRequests }: { allLoanRequests: any }) => {
 
@@ -26,14 +26,15 @@ const MyScoresPage = ({ allLoanRequests }: { allLoanRequests: any }) => {
     })
     
     const rows = userLoanRequests.map((loanRequest: any, i: number) => {
-      console.log({loanRequest})
+      const requestDate = new Date(ethers.BigNumber.from(loanRequest[3]).toNumber() * 1000)
+      const requestDateFormatted = requestDate.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' });
       return {
         id: i,
-        date: "x",
+        date: requestDateFormatted,
         proof1: loanRequest[1][1],
         proof2: loanRequest[1][2],
         proof3: loanRequest[1][0],
-        score: ethers.BigNumber.from(loanRequest[2]).toString(),
+        score: ethers.BigNumber.from(loanRequest[2]).toNumber() / 1000000,
       }
     })
 
