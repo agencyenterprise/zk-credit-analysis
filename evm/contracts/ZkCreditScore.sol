@@ -10,6 +10,7 @@ contract ZkCreditScore is Ownable {
         address requester;
         string[] proofs;
         uint score;
+        uint timestamp;
     }
 
     LoanRequest[] public loanRequests;
@@ -19,7 +20,7 @@ contract ZkCreditScore is Ownable {
     function addLoanRequest(address requester, string[] memory proofs, uint score) public onlyOwner {
         require(score <= 1000000, "Score is bigger than 1000000");
         emit LoanRequestCreated(requester, score);
-        loanRequests.push(LoanRequest(requester, proofs, score));
+        loanRequests.push(LoanRequest(requester, proofs, score, block.timestamp));
     }
 
     function getLoanRequests() public view returns (LoanRequest[] memory) {
