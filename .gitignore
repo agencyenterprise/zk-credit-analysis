@@ -21,3 +21,5 @@ circom_model/model_circuit/build
 /evm/typechain-types
 /evm/artifacts
 /evm/cache
+/evm/coverage
+/evm/coverage.json
