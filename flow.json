@@ -1,0 +1,29 @@
+{
+	"contracts": {
+		"Score":  "./cadence/contracts/Score.cdc"
+	  },
+	"networks": {
+		"emulator": "127.0.0.1:3569",
+		"mainnet": "access.mainnet.nodes.onflow.org:9000",
+		"sandboxnet": "access.sandboxnet.nodes.onflow.org:9000",
+		"testnet": "access.devnet.nodes.onflow.org:9000"
+	},
+	"accounts": {
+		"emulator-account": {
+			"address": "f8d6e0586b0a20c7",
+			"key": "37712b3053ee5930e2881c1f807635f0b92b303c7fe2ebc1e0a2c648fd78cbf4"
+		}
+	},
+	"deployments": {
+		"emulator": {
+		  "emulator-account": [
+			"Score"
+		  ]
+		}
+	  }
+}
+
+
+
+
+ 
