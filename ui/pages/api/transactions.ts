@@ -7,13 +7,13 @@ import { Alchemy, AssetTransfersCategory, Network } from "alchemy-sdk";
 const get_from_transactions = async (address: string) => {
   const config = {
     apiKey: process.env.ALCHEMY_API_KEY,
-    network: Network.ETH_MAINNET,
+    network: Network.MATIC_MUMBAI,
   };
   const alchemy = new Alchemy(config);
 
   const data = await alchemy.core.getAssetTransfers({
     fromBlock: "0x0",
-    fromAddress: "0x5c43B1eD97e52d009611D89b74fA829FE4ac56b1", //address, //
+    fromAddress: "0x7c125C1d515b8945841b3d5144a060115C58725F", //address, //
     category: [AssetTransfersCategory.EXTERNAL],
   });
   return data;
@@ -22,15 +22,16 @@ const get_from_transactions = async (address: string) => {
 const get_to_transactions = async (address: string) => {
   const config = {
     apiKey: process.env.ALCHEMY_API_KEY,
-    network: Network.ETH_MAINNET,
+    network: Network.MATIC_MUMBAI,
   };
   const alchemy = new Alchemy(config);
 
   const data = await alchemy.core.getAssetTransfers({
     fromBlock: "0x0",
-    toAddress: "0x5c43B1eD97e52d009611D89b74fA829FE4ac56b1", //address, //
+    toAddress: "0x7c125C1d515b8945841b3d5144a060115C58725F", //address, //
     category: [AssetTransfersCategory.EXTERNAL],
   });
+  console.log(data);
   return data;
 };
 

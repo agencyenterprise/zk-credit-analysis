@@ -116,7 +116,6 @@ export type State = {
 };
 
 function loanReducer(state: State, action: Action): State {
-  console.log("loanReducer", action);
   switch (action.type) {
     case "history": {
       const {

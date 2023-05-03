@@ -19,7 +19,7 @@ interface Transactions {
 }
 
 const validTransaction = (transaction: Transaction): boolean => {
-  return transaction.asset === "ETH" && transaction.category === "external";
+  return transaction.asset === "MATIC" && transaction.category === "external";
 };
 
 interface AggregatedTransactionData {
@@ -46,7 +46,8 @@ function round(x: number): number {
  * @returns
  */
 const ethToUSD = async (): Promise<number> => {
-  const url = "https://min-api.cryptocompare.com/data/price?fsym=ETH&tsyms=USD";
+  const url =
+    "https://min-api.cryptocompare.com/data/price?fsym=MATIC&tsyms=USD";
   const response = await fetch(url);
   const data = await response.json();
   return data.USD;
@@ -93,19 +94,16 @@ export const aggregateTransactionData = (
   };
 };
 
-export const getAggregatedFlowData = (
+export const getAggregatedWeb2Data = (
   ccavg: number,
   income: number,
-  loan: number,
-  balance: string
+  loan: number
 ): [[string, string, string, string], string] => {
   const monthlyIncome = income / 12;
   const balanceRatio = income / ccavg;
-  let parsedBalance =
-    parseInt(balance) > 10000 ? 10000 : parseInt(balance) * 10 ** 3;
   return [
     [
-      round(parsedBalance).toFixed(0),
+      round(income).toFixed(0),
       round(monthlyIncome).toFixed(0),
       round(ccavg).toFixed(0),
       round(balanceRatio * 10 ** 4).toFixed(0),

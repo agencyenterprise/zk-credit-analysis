@@ -13,3 +13,12 @@ circom_model/snarkjs-0.5.0
 circom_model/v0.5.0.zip
 circom_model/model_circuit/build
 /model
+
+# evm
+/evm/node_modules
+/evm/.bin
+/evm/typechain-types
+/evm/artifacts
+/evm/cache
+/evm/coverage
+/evm/coverage.json

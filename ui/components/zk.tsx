@@ -1,24 +1,32 @@
 import { useEffect, useState } from "react";
 import { initialize, ZoKratesProvider } from "zokrates-js";
 import { useMetamask } from "../hooks/useMetamask";
-import getTransactions, { getAggregatedFlowData } from "../utils/transactions";
+import getTransactions, { getAggregatedWeb2Data } from "../utils/transactions";
 import { useLoan } from "../hooks/useLoan";
 import LoanApproovalModel from "../utils/model";
 const snarkjs = require("snarkjs");
 import { toast } from "react-toastify";
-import { useAuth } from "../hooks/FlowAuthContext";
 import { useRouter } from "next/navigation";
 const ZK = (props: any) => {
   const { push } = useRouter();
   const { state } = useMetamask();
   const { state: loanState, dispatch } = useLoan();
-  const { currentUser, makeLoanRequest, getFlowBalance } = useAuth();
   const [zokratesProvider, setZokratesProvider] = useState<ZoKratesProvider>();
-  const [proof, setProof] = useState<{
-    zokratesProof: any;
-    snarkjsProof: any;
-  }>();
-
+  const makeLoanRequest = async (proofs: string[], score: number) => {
+    const { wallet } = state;
+    const loanRequest = await fetch("/api/addLoanRequest", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        requesterAddress: wallet,
+        proofs,
+        score,
+      }),
+    });
+    return await loanRequest.json();
+  };
   useEffect(() => {
     const load = async () => {
       let provider = await initialize();
@@ -26,10 +34,10 @@ const ZK = (props: any) => {
     };
     load();
   }, []);
-  const success = async (msg: any) => {
+  const success = async (msg: any, timeout: number = 3000) => {
     toast.success(msg, {
       position: "top-right",
-      autoClose: 3000,
+      autoClose: timeout,
       hideProgressBar: false,
       closeOnClick: true,
       pauseOnHover: true,
@@ -37,7 +45,7 @@ const ZK = (props: any) => {
       progress: undefined,
       theme: "light",
     });
-    await sleep(3000);
+    await sleep(timeout);
   };
   const info = async (msg: string) => {
     toast.info(msg, {
@@ -72,22 +80,17 @@ const ZK = (props: any) => {
     console.log(loanState);
     dispatch({ type: "analysis", isAnalyzing: true });
     try {
-      await info("Computing proof of balance for Ethereum...");
+      await info("Computing proof of balance for Polygon...");
       const ethAggragations = await getAggregations();
       const { snarkjsProof: ethBalanceProof } = await computeProofOfBalance(
         ethAggragations
       );
-      await info("Computing proof of balance for Flow...");
-      const { ccavg, loan, income } = loanState;
-      const flowBalance = await getFlowBalance();
-      console.log(flowBalance);
-      const flowAggregations = getAggregatedFlowData(
-        ccavg,
-        income,
-        loan,
-        flowBalance
+      await info(
+        "Computing proof of elegibility based on the financial data you provided..."
       );
-      const { snarkjsProof: flowBalanceProof } = await computeProofOfBalance(
+      const { ccavg, loan, income } = loanState;
+      const flowAggregations = getAggregatedWeb2Data(ccavg, income, loan);
+      const { snarkjsProof: web2BalanceProof } = await computeProofOfBalance(
         flowAggregations
       );
       await info("Computing loan approval...");
@@ -100,15 +103,21 @@ const ZK = (props: any) => {
       }
       const proofs = [
         JSON.stringify(ethBalanceProof),
-        JSON.stringify(flowBalanceProof),
-        JSON.stringify(data?.proof),
+        JSON.stringify(web2BalanceProof),
+        JSON.stringify(data!.proof),
       ];
       console.log(data);
-      const score = (data?.predictions || [])[1] || 0.0;
-      dispatch({ type: "loanResult", proofs, score });
-      await info("In order to continue, please sign the next transaction.");
-      await makeLoanRequest(proofs, score);
-      push("/");
+      console.log(proofs);
+      dispatch({ type: "loanResult", proofs, score: data!.score });
+      await info("Persisting your score data in our contract...");
+      await makeLoanRequest(proofs, data!.score);
+      await success(
+        <div className="flex flex-col">
+          <p className="text-sm">You are approved for a loan!</p>
+          <p className="text-xs">We will contat you in a few weeks!</p>
+        </div>,
+        5000
+      );
     } catch (err: any) {
       console.log(err);
       await error(
@@ -118,6 +127,8 @@ const ZK = (props: any) => {
         </div>
       );
     } finally {
+      await sleep(5000);
+      push("/");
       dispatch({ type: "analysis", isAnalyzing: false });
     }
   };
@@ -139,21 +150,10 @@ const ZK = (props: any) => {
       loan.toFixed(0),
     ];
   };
-  const flowTransactionData = () => {
-    const { loan, ccavg, income } = loanState;
-    const inputs = getAggregatedFlowData(
-      ccavg,
-      income,
-      loan,
-      currentUser.balance
-    );
-    return inputs;
-  };
   const computeProofOfBalance = async (
     inputs: [[string, string, string, string], string]
   ) => {
     try {
-      console.log(currentUser);
       const program = zokratesProvider!.compile(props.source);
       //const inputs = await getAggregations();
       const output = zokratesProvider!.computeWitness(program, inputs, {
@@ -181,28 +181,6 @@ const ZK = (props: any) => {
       throw new Error(
         "You are not elegible for a loan this time. Try again in a few weeks!"
       );
-    }
-  };
-
-  const verify = async () => {
-    try {
-      const { zokratesProof, snarkjsProof } = proof!;
-      const snarkjsVerifier = await snarkjs.groth16.verify(
-        props.snarkjs.vkey,
-        snarkjsProof.publicSignals,
-        snarkjsProof.proof
-      );
-      const zokratesVerifier = zokratesProvider!.verify(
-        props.verificationKey,
-        zokratesProof
-      );
-      if (snarkjsVerifier && zokratesVerifier) {
-        await success("Proof is valid!!");
-      } else {
-        throw new Error("Verification failed :(");
-      }
-    } catch (e) {
-      await error("Proof verification failed :(");
     }
   };
 

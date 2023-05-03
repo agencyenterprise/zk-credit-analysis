@@ -114,14 +114,6 @@ export default class LoanApproovalModel {
     const tensor = tf.tensor([preprocessedInput]);
     const output = this.model!.predict(tensor) as tf.Tensor;
     const predictions = Array.from(output.dataSync());
-    // let number;
-    // let maxProb = 0;
-    // predictions.forEach((prob, num) => {
-    //   if (prob > maxProb) {
-    //     maxProb = prob;
-    //     number = num;
-    //   }
-    // });
     const { index, maxProb } = predictions.reduce(
       (acc, prob, index) => {
         return acc.maxProb < prob
@@ -134,8 +126,10 @@ export default class LoanApproovalModel {
       { index: 0, maxProb: 0 }
     );
     const proof = await this.generateZkProof(preprocessedInput);
+    const parsedPredictions = predictions.map((v) => this.precisionRound(v, 6));
     return {
-      predictions: predictions.map((v) => this.precisionRound(v, 6)),
+      predictions: parsedPredictions,
+      score: this.precisionRound(parsedPredictions[1] * 10 ** 6, 0),
       prediction: index,
       proof: proof,
       predClass: index === 1 ? "Approved" : "Rejected",
