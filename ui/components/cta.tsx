@@ -1,5 +1,6 @@
 import { type FC } from "react";
 import { useMetamask } from "../hooks/useMetamask";
+import Link from "next/link";
 export const CTA: FC = () => {
   const { state } = useMetamask();
   return (
@@ -10,18 +11,18 @@ export const CTA: FC = () => {
       </p>
       {state.wallet ? (
         <div className="flex justify-center py-10 flex-row space-x-3">
-          <a
+          <Link
             className="hover:opacity-50 text-gray-700 underline text-xl animate-pulse"
             href="/loan"
           >
             Request a Loan
-          </a>
-          <a
+          </Link>
+          <Link
             className="hover:opacity-50 text-gray-700 underline text-xl animate-pulse"
             href="/score"
           >
             View my score
-          </a>
+          </Link>
         </div>
       ) : (
         <div className="flex flex-col justify-center py-10  space-x-3 black">
