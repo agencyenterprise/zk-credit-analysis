@@ -32,9 +32,6 @@ export default function LoanTermsForm(props: any) {
       nextPage();
     },
   });
-  useEffect(() => {
-    console.log(state);
-  }, [state]);
   return (
     <form className="h-full" onSubmit={formik.handleSubmit}>
       <div className="flex flex-col space-y-10 justify-between  max-w-[600px] pt-10 h-full">
