@@ -127,9 +127,9 @@ const ZK = (props: any) => {
         </div>
       );
     } finally {
-      dispatch({ type: "analysis", isAnalyzing: false });
       await sleep(5000);
       push("/");
+      dispatch({ type: "analysis", isAnalyzing: false });
     }
   };
   const getAggregations = async (): Promise<
