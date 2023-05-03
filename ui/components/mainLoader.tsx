@@ -1,6 +1,6 @@
 import { ClimbingBoxLoader } from "react-spinners";
 
-export default (props: any) => {
+export default function MainLoader(props: any) {
   const { isLoading } = props;
   return (
     <>
@@ -16,4 +16,4 @@ export default (props: any) => {
       )}
     </>
   );
-};
+}

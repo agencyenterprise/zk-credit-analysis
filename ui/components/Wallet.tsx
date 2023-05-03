@@ -2,6 +2,7 @@ import Link from "next/link";
 import { useListen } from "../hooks/useListen";
 import { useMetamask } from "../hooks/useMetamask";
 import { Loading } from "./Loading";
+
 export default function Wallet() {
   const {
     dispatch,
@@ -41,11 +42,11 @@ export default function Wallet() {
     <header>
       <nav className="bg-transparent border-gray-200 px-4 lg:px-6 py-2.5 fixed top-0 w-full">
         <div className="flex flex-wrap justify-between items-center mx-auto max-w-screen-xl">
-          <a href="/" className="flex items-center">
+          <Link href="/" className="flex items-center">
             <span className="inline-flex w-full font-bold items-center justify-center text-gray-700 hover:text-gray-400 px-5 text-xs lg:text-sm desktop:text-sm  sm:w-auto">
               ZK Credit
             </span>
-          </a>
+          </Link>
           <div className="flex items-center lg:order-2">
             {showConnectButton && (
               <div className="text-gray-800 dark:text-white focus:ring-4 focus:ring-gray-300 font-medium rounded-lg lg:text-xs md:text-xs xs:text-xs px-4 lg:px-5 py-1 lg:py-2.5 mr-2 animate-pulse">
