@@ -7,7 +7,6 @@ node_modules
 ezkl
 circom_model/keras2circom
 ./circom_model/snarkjs-0.5.0
-ui/public/score_model.zkey
 circom_model/powersOfTau28_hez_final_22.ptau
 circom_model/score_model
 circom_model/snarkjs-0.5.0
