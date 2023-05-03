@@ -170,19 +170,19 @@ const LoanForm: NextPage = (props) => {
 
 export async function getStaticProps() {
   // zokrates artifacts
-  const source = (await readFile("../circuit/balance.zok")).toString();
-  const program = (await readFile("../circuit/balance")).toString("hex");
+  const source = (await readFile("./circuit/balance.zok")).toString();
+  const program = (await readFile("./circuit/balance")).toString("hex");
   const verificationKey = JSON.parse(
-    (await readFile("../circuit/verification.key")).toString()
+    (await readFile("./circuit/verification.key")).toString()
   );
-  const provingKey = (await readFile("../circuit/proving.key")).toString("hex");
+  const provingKey = (await readFile("./circuit/proving.key")).toString("hex");
 
   // snarkjs artifacts
-  const zkey = (await readFile("../circuit/snarkjs/balance.zkey")).toString(
+  const zkey = (await readFile("./circuit/snarkjs/balance.zkey")).toString(
     "hex"
   );
   const vkey = JSON.parse(
-    (await readFile("../circuit/snarkjs/verification_key.json")).toString()
+    (await readFile("./circuit/snarkjs/verification_key.json")).toString()
   );
 
   return {
