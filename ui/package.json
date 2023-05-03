@@ -1,5 +1,5 @@
 {
-  "name": "web3-unleashed-demo",
+  "name": "zk-credit",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -15,8 +15,6 @@
     "@emotion/styled": "^11.10.6",
     "@mui/material": "^5.12.2",
     "@mui/x-data-grid": "^6.3.0",
-    "@onflow/fcl": "^1.3.2",
-    "@onflow/flow-cadut-generator": "^0.0.1",
     "@tensorflow/tfjs": "^4.4.0",
     "alchemy-sdk": "^2.8.1",
     "defender-relay-client": "^1.38.0",
@@ -35,7 +33,6 @@
     "zokrates-js": "1.1.3"
   },
   "devDependencies": {
-    "@onflow/types": "^1.0.5",
     "@tailwindcss/aspect-ratio": "^0.4.2",
     "@types/node": "18.7.23",
     "@types/react": "18.0.21",

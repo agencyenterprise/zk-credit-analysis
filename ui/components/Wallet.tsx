@@ -2,7 +2,6 @@ import Link from "next/link";
 import { useListen } from "../hooks/useListen";
 import { useMetamask } from "../hooks/useMetamask";
 import { Loading } from "./Loading";
-import "../flow/config";
 export default function Wallet() {
   const {
     dispatch,
