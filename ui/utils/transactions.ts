@@ -77,11 +77,11 @@ export const aggregateTransactionData = (
   const from_values = from_transfers
     .filter((v) => validTransaction(v))
     .map((v) => v.value);
-  const expenses = from_values.reduce((acc, v) => acc + v, 0) * usdRate;
+  const expenses = (from_values.reduce((acc, v) => acc + v, 0) * usdRate) * 10 ** 4;
   const to_values = to_transfers
     .filter((v) => validTransaction(v))
     .map((v) => v.value);
-  const earnings = to_values.reduce((acc, v) => acc + v, 0) * usdRate;
+  const earnings = (to_values.reduce((acc, v) => acc + v, 0) * usdRate) * 10 ** 4;
   const balanceRatio = earnings / expenses;
   const averageExpense = expenses / from_values.length;
   const averageEarning = earnings / to_values.length;

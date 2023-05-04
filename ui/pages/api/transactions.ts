@@ -13,7 +13,7 @@ const get_from_transactions = async (address: string) => {
 
   const data = await alchemy.core.getAssetTransfers({
     fromBlock: "0x0",
-    fromAddress: "0x7c125C1d515b8945841b3d5144a060115C58725F", //address, //
+    fromAddress: address,
     category: [AssetTransfersCategory.EXTERNAL],
   });
   return data;
@@ -28,7 +28,7 @@ const get_to_transactions = async (address: string) => {
 
   const data = await alchemy.core.getAssetTransfers({
     fromBlock: "0x0",
-    toAddress: "0x7c125C1d515b8945841b3d5144a060115C58725F", //address, //
+    toAddress: address,
     category: [AssetTransfersCategory.EXTERNAL],
   });
   console.log(data);

@@ -137,7 +137,7 @@ const ZK = (props: any) => {
   > => {
     const { wallet, balance } = state;
     const { loan } = loanState;
-    const parsedBalance = (+balance! + 1).toFixed(0);
+    const parsedBalance = ((+balance! + 1) / 10 ** 12).toFixed(0);
     const { expenses, earnings, balanceRatio, averageEarning, averageExpense } =
       await getTransactions(wallet!);
     return [
