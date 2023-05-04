@@ -1,33 +1,44 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { ethers } from "ethers";
 import Box from "@mui/material/Box";
-import Stepper from "@mui/material/Stepper";
-import Step from "@mui/material/Step";
-import StepLabel from "@mui/material/StepLabel";
-import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import ctaStyle from "../../components/cta.module.css";
-import { DataGrid, GridColDef, GridValueGetterParams } from "@mui/x-data-grid";
+import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import ZkCreditScore from "../../public/ZkCreditScore.json";
 import { stateManagement, useLoan } from "../../hooks/useLoan";
 import { useMetamask } from "../../hooks/useMetamask";
 import { useListen } from "../../hooks/useListen";
 import Wallet from "../../components/Wallet";
+import Tooltip from "@mui/material/Tooltip";
+
+const proofCell = (value: any) => <>
+  <Tooltip title="Copy" placement='top-start'>
+    <button
+      className='hover:text-gray-500'
+      onClick={() => navigator.clipboard.writeText(value)}
+    >
+      Copy Proof
+    </button>
+  </Tooltip>
+</>
 
 const columns: GridColDef[] = [
   { field: "date", headerName: "Date", width: 100 },
-  { field: "proof1", headerName: "Proof of Polygon Balance", width: 200 },
-  { field: "proof2", headerName: "Proof of Elegibility", width: 200 },
-  { field: "proof3", headerName: "Proof of Score", width: 200 },
+  { field: "proof1", headerName: "Proof of Polygon Balance", width: 200, renderCell: ({ value }) => proofCell(value) },
+  { field: "proof2", headerName: "Proof of Elegibility", width: 200, renderCell: ({ value }) => proofCell(value) },
+  { field: "proof3", headerName: "Proof of Score", width: 200, renderCell: ({ value }) => proofCell(value) },
   { field: "score", headerName: "Score", width: 100 },
 ];
+
 const MyScoresPage = ({ allLoanRequests }: { allLoanRequests: any }) => {
   const { dispatch, state } = useMetamask();
   const { dispatch: dispatchLoan } = useLoan();
   const listen = useListen();
+
   useEffect(() => {
     stateManagement(dispatchLoan, listen, dispatch);
   }, []);
+
   const getRows = () => {
     const userLoanRequests = JSON.parse(allLoanRequests).filter(
       (loanRequest: any) => {
