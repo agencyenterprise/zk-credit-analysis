@@ -36,7 +36,14 @@ const MyScoresPage = () => {
   const { dispatch: dispatchLoan } = useLoan();
   const listen = useListen();
 
-  console.log('userLoanRequests', userLoanRequests)
+  useEffect(() => {
+    fetch("/api/getLoansByUser", {
+      method: "POST",
+      body: JSON.stringify({ userAddress: state.wallet }),
+    }).then((res) => res.json()).then((res) => {
+      setUserLoanRequests(res.userLoanRequests);
+    })
+  }, [state])
 
   useEffect(() => {
     stateManagement(dispatchLoan, listen, dispatch);
