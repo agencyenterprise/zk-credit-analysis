@@ -4,7 +4,6 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import ctaStyle from "../../components/cta.module.css";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
-import ZkCreditScore from "../../public/ZkCreditScore.json";
 import { stateManagement, useLoan } from "../../hooks/useLoan";
 import { useMetamask } from "../../hooks/useMetamask";
 import { useListen } from "../../hooks/useListen";
@@ -37,6 +36,7 @@ const MyScoresPage = () => {
   const listen = useListen();
 
   useEffect(() => {
+    if (!state.wallet) return
     fetch("/api/getLoansByUser", {
       method: "POST",
       body: JSON.stringify({ userAddress: state.wallet }),
@@ -47,12 +47,6 @@ const MyScoresPage = () => {
 
   useEffect(() => {
     stateManagement(dispatchLoan, listen, dispatch);
-    fetch("/api/getLoansByUser", {
-      method: "POST",
-      body: JSON.stringify({ userAddress: state.wallet }),
-    }).then((res) => res.json()).then((res) => {
-      setUserLoanRequests(res.userLoanRequests);
-    })
   }, []);
 
   const getRows = () => {
