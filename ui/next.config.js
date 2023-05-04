@@ -4,6 +4,17 @@ module.exports = {
   // basePath: "/zokrates-nextjs-demo",
   // assetPrefix: "/zokrates-nextjs-demo/",
   reactStrictMode: true,
+  headers: () => [
+    {
+      source: "/:path*",
+      headers: [
+        {
+          key: "Cache-Control",
+          value: "no-store",
+        },
+      ],
+    },
+  ],
   experimental: {
     images: {
       unoptimized: true,
