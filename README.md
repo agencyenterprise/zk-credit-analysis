@@ -1,5 +1,5 @@
 
-# ZK Credit Score System
+# ZK Credit Score
 
 ![Logo](https://i.ibb.co/rpt77dr/8db82a156d434719bc201fe2f7e980f5.png) 
 
